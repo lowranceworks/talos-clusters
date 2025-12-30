@@ -1,0 +1,24 @@
+# Ignore everything by default
+*
+
+# But track encrypted files
+!*.enc.*
+
+# Track SOPS configuration
+!.sops.yaml
+
+# Track directory structure (so Git doesn't lose empty dirs)
+!*/
+
+# Track common configuration files
+!.gitignore
+!.envrc
+!Taskfile.yaml
+!README.md
+
+# If you want to track already-encrypted-in-place files (SOPS encrypts YAML in-place)
+# Uncomment these lines:
+# !*.yaml
+# !.env
+# !kubeconfig
+# !talosconfig
