@@ -1,0 +1,309 @@
+version: '3'
+
+vars:
+  CLUSTER_DIR: clusters/platform/prod/proxmox/home/platform-cluster
+  YAML_FILES: "*.yaml"
+  BINARY_FILES: ".env .envrc kubeconfig talosconfig"
+
+tasks:
+  encrypt:all:
+    desc: Encrypt all sensitive files in the cluster directory
+    cmds:
+      - task: encrypt:yaml
+      - task: encrypt:binary
+
+  encrypt:yaml:
+    desc: Encrypt all YAML files to .enc.yaml versions
+    dir: "{{.CLUSTER_DIR}}"
+    cmds:
+      - |
+        for file in *.yaml; do
+          # Skip files that already have .enc. in the name
+          if [[ "$file" == *.enc.* ]]; then
+            continue
+          fi
+          
+          if [ -f "$file" ]; then
+            base="${file%.yaml}"
+            enc_file="${base}.enc.yaml"
+            
+            if [ -f "$enc_file" ]; then
+              echo "Encrypted version already exists: $enc_file, skipping..."
+            else
+              echo "Encrypting $file -> $enc_file"
+              sops --encrypt "$file" > "$enc_file"
+              rm "$file"
+            fi
+          fi
+        done
+    silent: false
+
+  encrypt:binary:
+    desc: Encrypt binary/non-YAML files to .enc versions
+    dir: "{{.CLUSTER_DIR}}"
+    cmds:
+      - |
+        #!/bin/bash
+        for file in {{.BINARY_FILES}}; do
+          if [ -f "$file" ]; then
+            # Skip if already encrypted (has .enc in name)
+            if [[ "$file" == *.enc ]]; then
+              echo "Skipping already encrypted file: $file"
+              continue
+            fi
+            
+            enc_file="${file}.enc"
+            
+            if [ -f "$enc_file" ]; then
+              echo "Encrypted version already exists: $enc_file, skipping..."
+            else
+              echo "Encrypting $file -> $enc_file"
+              sops --encrypt --input-type binary --output-type binary "$file" > "$enc_file"
+              rm "$file"
+            fi
+          fi
+        done
+    silent: false
+
+  encrypt:file:
+    desc: Encrypt a specific file to .enc version # NOTE: (usage: task encrypt:file FILE=path/to/file)
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Error: FILE variable not set. Usage: task encrypt:file FILE=path/to/file"
+          exit 1
+        fi
+        
+        # Skip if already encrypted
+        if [[ "{{.FILE}}" == *.enc.* ]] || [[ "{{.FILE}}" == *.enc ]]; then
+          echo "File already appears to be encrypted: {{.FILE}}"
+          exit 1
+        fi
+
+        if [[ "{{.FILE}}" == *.yaml ]] || [[ "{{.FILE}}" == *.yml ]]; then
+          base="${{.FILE}%.yaml}"
+          enc_file="${base}.enc.yaml"
+          echo "Encrypting YAML file: {{.FILE}} -> $enc_file"
+          sops --encrypt "{{.FILE}}" > "$enc_file"
+          rm "{{.FILE}}"
+        else
+          enc_file="{{.FILE}}.enc"
+          echo "Encrypting binary file: {{.FILE}} -> $enc_file"
+          sops --encrypt --input-type binary --output-type binary "{{.FILE}}" > "$enc_file"
+          rm "{{.FILE}}"
+        fi
+        echo "Created encrypted file: $enc_file"
+
+  decrypt:all:
+    desc: Decrypt all .enc files to their original names and remove encrypted versions
+    dir: "{{.CLUSTER_DIR}}"
+    cmds:
+      - |
+        #!/bin/bash
+        # Decrypt YAML files
+        for file in *.enc.yaml; do
+          if [ -f "$file" ]; then
+            # Check if file has SOPS metadata
+            if ! grep -q "sops:" "$file" 2>/dev/null; then
+              echo "⚠ Skipping $file - not encrypted with SOPS (renaming to remove .enc)"
+              orig="${file%.enc.yaml}.yaml"
+              mv "$file" "$orig"
+              continue
+            fi
+            
+            orig="${file%.enc.yaml}.yaml"
+            echo "Decrypting $file -> $orig"
+            sops --decrypt "$file" > "$orig"
+            rm "$file"
+            echo "Removed encrypted file: $file"
+          fi
+        done
+      - |
+        #!/bin/bash
+        # Decrypt binary files (including dotfiles)
+        find . -maxdepth 1 -name '*.enc' -type f | while read -r enc_file; do
+          if [ -f "$enc_file" ]; then
+            # Try to decrypt, skip if not SOPS encrypted
+            if ! sops --decrypt --input-type binary --output-type binary "$enc_file" > /dev/null 2>&1; then
+              echo "⚠ Skipping $enc_file - not encrypted with SOPS (renaming to remove .enc)"
+              orig="${enc_file%.enc}"
+              mv "$enc_file" "$orig"
+              continue
+            fi
+            
+            # Remove .enc extension to get original name
+            orig="${enc_file%.enc}"
+            echo "Decrypting $enc_file -> $orig"
+            sops --decrypt --input-type binary --output-type binary "$enc_file" > "$orig"
+            rm "$enc_file"
+            echo "Removed encrypted file: $enc_file"
+          fi
+        done
+
+  decrypt:file:
+    desc: Decrypt a specific .enc file to its original name and remove encrypted version # NOTE: (usage: task decrypt:file FILE=path/to/file.enc.yaml)
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Error: FILE variable not set. Usage: task decrypt:file FILE=path/to/file.enc.yaml"
+          exit 1
+        fi
+        
+        if [[ "{{.FILE}}" == *.enc.yaml ]]; then
+          orig="${{.FILE}%.enc.yaml}.yaml"
+          echo "Decrypting YAML file: {{.FILE}} -> $orig"
+          sops --decrypt "{{.FILE}}" > "$orig"
+          rm "{{.FILE}}"
+          echo "Removed encrypted file: {{.FILE}}"
+        elif [[ "{{.FILE}}" == *.enc ]]; then
+          orig="${{.FILE}%.enc}"
+          echo "Decrypting binary file: {{.FILE}} -> $orig"
+          sops --decrypt --input-type binary --output-type binary "{{.FILE}}" > "$orig"
+          rm "{{.FILE}}"
+          echo "Removed encrypted file: {{.FILE}}"
+        else
+          echo "Error: File doesn't appear to be encrypted (no .enc or .enc.yaml extension)"
+          exit 1
+        fi
+        echo "Decrypted to: $orig"
+
+  edit:
+    desc: Edit an encrypted file # NOTE: (usage: task edit FILE=path/to/file.enc.yaml)
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Error: FILE variable not set. Usage: task edit FILE=path/to/file.enc.yaml"
+          exit 1
+        fi
+        sops "{{.FILE}}"
+
+  clean:decrypted:
+    desc: Remove all decrypted files (non-.enc versions)
+    dir: "{{.CLUSTER_DIR}}"
+    cmds:
+      - |
+        #!/bin/bash
+        echo "Removing decrypted files..."
+        # Remove YAML files that have .enc.yaml versions
+        for enc_file in *.enc.yaml; do
+          if [ -f "$enc_file" ]; then
+            orig="${enc_file%.enc.yaml}.yaml"
+            if [ -f "$orig" ]; then
+              echo "Removing $orig"
+              rm "$orig"
+            fi
+          fi
+        done
+        
+        # Remove binary files that have .enc versions (including dotfiles)
+        find . -maxdepth 1 -name '*.enc' -type f | while read -r enc_file; do
+          orig="${enc_file%.enc}"
+          if [ -f "$orig" ]; then
+            echo "Removing $orig"
+            rm "$orig"
+          fi
+        done
+        echo "Cleanup complete"
+
+  status:
+    desc: Check encryption status of files
+    dir: "{{.CLUSTER_DIR}}"
+    cmds:
+      - |
+        #!/bin/bash
+        echo "=== Encryption Status ==="
+        echo ""
+        echo "Encrypted YAML Files:"
+        for file in *.enc.yaml; do
+          if [ -f "$file" ]; then
+            orig="${file%.enc.yaml}.yaml"
+            if [ -f "$orig" ]; then
+              echo "  ⚠ $file (decrypted version exists: $orig)"
+            else
+              echo "  ✓ $file"
+            fi
+          fi
+        done
+        
+        echo ""
+        echo "Encrypted Binary Files:"
+        find . -maxdepth 1 -name '*.enc' -type f | while read -r file; do
+          orig="${file%.enc}"
+          if [ -f "$orig" ]; then
+            echo "  ⚠ $file (decrypted version exists: $orig)"
+          else
+            echo "  ✓ $file"
+          fi
+        done
+        
+        echo ""
+        echo "Unencrypted Files:"
+        for file in *.yaml; do
+          if [ -f "$file" ] && [[ "$file" != *.enc.yaml ]]; then
+            enc="${file%.yaml}.enc.yaml"
+            if [ ! -f "$enc" ]; then
+              echo "  ✗ $file (no encrypted version)"
+            fi
+          fi
+        done
+
+  validate:
+    desc: Validate that all .enc files can be decrypted
+    dir: "{{.CLUSTER_DIR}}"
+    cmds:
+      - |
+        #!/bin/bash
+        echo "=== Validating Encrypted Files ==="
+        failed=0
+
+        for file in *.enc.yaml; do
+          if [ -f "$file" ]; then
+            if sops --decrypt "$file" > /dev/null 2>&1; then
+              echo "  ✓ $file"
+            else
+              echo "  ✗ $file (failed to decrypt)"
+              failed=1
+            fi
+          fi
+        done
+
+        find . -maxdepth 1 -name '*.enc' -type f | while read -r file; do
+          if sops --decrypt --input-type binary --output-type binary "$file" > /dev/null 2>&1; then
+            echo "  ✓ $file"
+          else
+            echo "  ✗ $file (failed to decrypt)"
+            failed=1
+          fi
+        done
+
+        if [ $failed -eq 1 ]; then
+          exit 1
+        fi
+        echo ""
+        echo "All encrypted files validated successfully!"
+
+  setup:gitignore:
+    desc: Setup .gitignore to only track .enc files
+    cmds:
+      - |
+        cat > .gitignore << 'EOF'
+        # Ignore everything by default
+        *
+        
+        # But track encrypted files
+        !*.enc.*
+        !*.enc
+        
+        # Track SOPS configuration
+        !.sops.yaml
+        
+        # Track directory structure
+        !*/
+        
+        # Track project files
+        !.gitignore
+        !Taskfile.yaml
+        !Taskfile.yml
+        !README.md
+        EOF
+        echo ".gitignore configured to only track encrypted files"
