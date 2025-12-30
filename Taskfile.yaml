@@ -60,8 +60,8 @@ tasks:
             if [ -f "$enc_file" ]; then
               echo "Encrypted version already exists: $enc_file, skipping..."
             else
-              echo "Encrypting $file -> $enc_file (as YAML)"
-              sops --encrypt --input-type yaml --output-type yaml "$file" > "$enc_file"
+              echo "Encrypting $file -> $enc_file (as binary)"
+              sops --encrypt --input-type binary --output-type binary "$file" > "$enc_file"
               rm "$file"
             fi
           fi
@@ -115,10 +115,12 @@ tasks:
         for file in {{.YAML_CONFIG_FILES}}; do
           enc_file="${file}.enc"
           if [ -f "$enc_file" ]; then
-            if grep -q "sops:" "$enc_file" 2>/dev/null; then
-              echo "Decrypting $enc_file -> $file (as YAML)"
-              sops --decrypt --input-type yaml --output-type yaml "$enc_file" > "$file"
+            echo "Decrypting $enc_file -> $file (as binary)"
+            if sops --decrypt --input-type binary --output-type binary "$enc_file" > "$file" 2>/dev/null; then
               rm "$enc_file"
+            else
+              echo "⚠ Failed to decrypt $enc_file"
+              rm "$file"  # Remove the potentially corrupted output
             fi
           fi
         done
@@ -132,11 +134,13 @@ tasks:
             continue
           fi
           
-          if sops --decrypt --input-type binary --output-type binary "$enc_file" > /dev/null 2>&1; then
-            orig="${enc_file%.enc}"
-            echo "Decrypting $enc_file -> $orig"
-            sops --decrypt --input-type binary --output-type binary "$enc_file" > "$orig"
+          orig="${enc_file%.enc}"
+          echo "Decrypting $enc_file -> $orig (as binary)"
+          if sops --decrypt --input-type binary --output-type binary "$enc_file" > "$orig" 2>/dev/null; then
             rm "$enc_file"
+          else
+            echo "⚠ Failed to decrypt $enc_file"
+            rm "$orig"  # Remove the potentially corrupted output
           fi
         done
 
