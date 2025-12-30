@@ -46,6 +46,20 @@ git commit -m "Update configuration"
 git push
 ```
 
+
+### Applying Configuration
+
+```sh
+# Change directory to respective cluster (direnv will read .env to source the kubeconfig context)
+cd ./clusters/platform/prod/proxmox/home/platform-cluster/
+
+# Apply the updated configuration to each node
+talosctl apply-config --nodes $CONTROLPLANE_01_IP --file controlplane-01.yaml
+talosctl apply-config --nodes $WORKER_01_IP --file worker-01.yaml
+talosctl apply-config --nodes $WORKER_02_IP --file worker-02.yaml
+talosctl apply-config --nodes $WORKER_03_IP --file worker-03.yaml
+```
+
 ## Common Commands
 
 | Command | Description |
