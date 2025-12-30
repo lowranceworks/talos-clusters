@@ -1,2 +1,4 @@
 creation_rules:
-  - pgp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
+  - path_regex: .*\.yaml$
+    encrypted_regex: "^(token|secret|endpoint|crt|key|certSANs)$"
+    pgp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
