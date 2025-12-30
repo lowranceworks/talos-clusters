@@ -12,9 +12,12 @@
 
 # Track common configuration files
 !.gitignore
-!.envrc
 !Taskfile.yaml
 !README.md
+
+# Track Encrypted files
+!*.enc
+!*.enc.*
 
 # If you want to track already-encrypted-in-place files (SOPS encrypts YAML in-place)
 # Uncomment these lines:
