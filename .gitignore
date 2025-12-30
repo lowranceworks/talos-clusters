@@ -19,6 +19,10 @@
 !*.enc
 !*.enc.*
 
+# Track docs directory and all its contents
+!docs/
+!docs/**.md
+
 # If you want to track already-encrypted-in-place files (SOPS encrypts YAML in-place)
 # Uncomment these lines:
 # !*.yaml
