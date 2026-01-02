@@ -4,3 +4,4 @@ worker.yaml
 *secret*
 kubeconfig
 talosconfig
+tailscale.patch.yaml
