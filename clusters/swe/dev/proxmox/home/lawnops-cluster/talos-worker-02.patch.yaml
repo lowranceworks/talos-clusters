@@ -8,9 +8,7 @@ machine:
               addresses:
                 - 192.168.1.222/24
               routes:
-                # The route's network.
                 - network: 0.0.0.0/0
-                  # The route's gateway.
                   gateway: 192.168.1.254
               dhcp: false
     # Mounts Required for Longhorn on Worker Nodes
