@@ -1,7 +1,7 @@
 machine:
     # Static IP Configuration
     network:
-        hostname: talos-worker-01
+        hostname: platform-prod-proxmox-home-platform-worker-01
         interfaces:
             - interface: eth0
               addresses:

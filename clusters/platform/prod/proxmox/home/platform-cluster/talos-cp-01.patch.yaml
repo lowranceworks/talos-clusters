@@ -1,7 +1,7 @@
 machine:
     # Static IP Configuration
     network:
-        hostname: talos-cp-01
+        hostname: platform-prod-proxmox-home-platform-cp-01
         interfaces:
             - interface: eth0
               addresses:
