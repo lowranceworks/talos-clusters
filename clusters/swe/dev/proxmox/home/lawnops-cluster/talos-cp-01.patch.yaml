@@ -1,0 +1,12 @@
+machine:
+    # Static IP Configuration
+    network:
+        hostname: swe-dev-proxmox-home-lawnops-cp-01
+        interfaces:
+            - interface: eth0
+              addresses:
+                - 192.168.1.220/24
+              routes:
+                - network: 0.0.0.0/0
+                  gateway: 192.168.1.254
+              dhcp: false
