@@ -1,0 +1,24 @@
+machine:
+    # Static IP Configuration
+    network:
+        hostname: swe-dev-proxmox-home-lawnops-worker-03
+        interfaces:
+            - interface: eth0
+              addresses:
+                - 192.168.1.223/24
+              routes:
+                - network: 0.0.0.0/0
+                  gateway: 192.168.1.254
+              dhcp: false
+    # Mounts Required for Longhorn on Worker Nodes
+    # Remove This Section for Control Plane Nodes!
+    # (Leave for Single Node Cluster)
+    kubelet:
+        extraMounts:
+            - destination: /var/lib/longhorn
+              type: bind
+              source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw

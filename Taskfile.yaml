@@ -1,0 +1,162 @@
+version: '3'
+
+vars:
+  YAML_FILES: "controlplane.yaml worker.yaml tailscale.patch.yaml secrets.yaml"
+  CONFIG_FILES: "kubeconfig talosconfig"
+
+tasks:
+  encrypt:all:
+    desc: Encrypt all sensitive files
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - task: encrypt:yaml
+      - task: encrypt:configs
+
+  encrypt:yaml:
+    desc: Encrypt YAML files (controlplane.yaml, worker.yaml)
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - |
+        for file in {{.YAML_FILES}}; do
+          if [ -f "$file" ]; then
+            enc_file="${file%.yaml}.enc.yaml"
+            
+            if [ -f "$enc_file" ]; then
+              echo "Encrypted version already exists: $enc_file, skipping..."
+            else
+              echo "Encrypting $file -> $enc_file"
+              sops --encrypt "$file" > "$enc_file"
+              rm "$file"
+            fi
+          fi
+        done
+
+  encrypt:configs:
+    desc: Encrypt config files (kubeconfig, talosconfig)
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - |
+        for file in {{.CONFIG_FILES}}; do
+          if [ -f "$file" ]; then
+            enc_file="${file}.enc"
+            
+            if [ -f "$enc_file" ]; then
+              echo "Encrypted version already exists: $enc_file, skipping..."
+            else
+              echo "Encrypting $file -> $enc_file"
+              sops --encrypt --input-type binary --output-type binary "$file" > "$enc_file"
+              rm "$file"
+            fi
+          fi
+        done
+
+  decrypt:all:
+    desc: Decrypt all .enc files to their original names
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - task: decrypt:yaml
+      - task: decrypt:configs
+
+  decrypt:yaml:
+    desc: Decrypt YAML files
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - |
+        for file in {{.YAML_FILES}}; do
+          enc_file="${file%.yaml}.enc.yaml"
+          if [ -f "$enc_file" ]; then
+            if ! grep -q "sops:" "$enc_file" 2>/dev/null; then
+              echo "⚠ Skipping $enc_file - not encrypted with SOPS"
+              continue
+            fi
+            
+            echo "Decrypting $enc_file -> $file"
+            sops --decrypt "$enc_file" > "$file"
+            rm "$enc_file"
+          fi
+        done
+
+  decrypt:configs:
+    desc: Decrypt config files
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - |
+        for file in {{.CONFIG_FILES}}; do
+          enc_file="${file}.enc"
+          if [ -f "$enc_file" ]; then
+            echo "Decrypting $enc_file -> $file"
+            if sops --decrypt --input-type binary --output-type binary "$enc_file" > "$file" 2>/dev/null; then
+              rm "$enc_file"
+            else
+              echo "⚠ Failed to decrypt $enc_file"
+              rm "$file"
+            fi
+          fi
+        done
+
+  status:
+    desc: Check encryption status of files
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - |
+        echo "=== Encryption Status ==="
+        echo ""
+        echo "YAML Files:"
+        for file in {{.YAML_FILES}}; do
+          enc_file="${file%.yaml}.enc.yaml"
+          if [ -f "$enc_file" ]; then
+            echo "  ✓ $file (encrypted as $enc_file)"
+          elif [ -f "$file" ]; then
+            echo "  ✗ $file (unencrypted)"
+          else
+            echo "  - $file (not found)"
+          fi
+        done
+        echo ""
+        echo "Config Files:"
+        for file in {{.CONFIG_FILES}}; do
+          enc_file="${file}.enc"
+          if [ -f "$enc_file" ]; then
+            echo "  ✓ $file (encrypted as $enc_file)"
+          elif [ -f "$file" ]; then
+            echo "  ✗ $file (unencrypted)"
+          else
+            echo "  - $file (not found)"
+          fi
+        done
+
+  validate:
+    desc: Validate that all .enc files can be decrypted
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - |
+        echo "=== Validating Encrypted Files ==="
+        failed=0
+
+        for file in {{.YAML_FILES}}; do
+          enc_file="${file%.yaml}.enc.yaml"
+          if [ -f "$enc_file" ]; then
+            if sops --decrypt "$enc_file" > /dev/null 2>&1; then
+              echo "  ✓ $enc_file"
+            else
+              echo "  ✗ $enc_file (failed to decrypt)"
+              failed=1
+            fi
+          fi
+        done
+
+        for file in {{.CONFIG_FILES}}; do
+          enc_file="${file}.enc"
+          if [ -f "$enc_file" ]; then
+            if sops --decrypt --input-type binary --output-type binary "$enc_file" > /dev/null 2>&1; then
+              echo "  ✓ $enc_file"
+            else
+              echo "  ✗ $enc_file (failed to decrypt)"
+              failed=1
+            fi
+          fi
+        done
+
+        [ $failed -eq 1 ] && exit 1
+        echo ""
+        echo "All encrypted files validated successfully!"
