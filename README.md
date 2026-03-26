@@ -54,10 +54,29 @@ git push
 cd ./clusters/platform/prod/proxmox/home/platform-cluster/
 
 # Apply the updated configuration to each node
-talosctl apply-config --nodes $CONTROLPLANE_01_IP --file controlplane-01.yaml
-talosctl apply-config --nodes $WORKER_01_IP --file worker-01.yaml
-talosctl apply-config --nodes $WORKER_02_IP --file worker-02.yaml
-talosctl apply-config --nodes $WORKER_03_IP --file worker-03.yaml
+talosctl apply-config \
+  --nodes $CONTROLPLANE_01_IP \
+  --file controlplane.yaml \
+  --config-patch @talos-cp-01.patch.yaml \
+  --config-patch @tailscale.patch.yaml
+
+talosctl apply-config \
+  --file worker.yaml \
+  --nodes $WORKER_01_IP \
+  --config-patch @talos-worker-01.patch.yaml \
+  --config-patch @tailscale.patch.yaml
+
+talosctl apply-config \
+  --file worker.yaml \
+  --nodes $WORKER_02_IP \
+  --config-patch @talos-worker-02.patch.yaml \
+  --config-patch @tailscale.patch.yaml
+
+talosctl apply-config \
+  --file worker.yaml \
+  --nodes $WORKER_03_IP \
+  --config-patch @talos-worker-03.patch.yaml \
+  --config-patch @tailscale.patch.yaml
 ```
 
 ## Common Commands
