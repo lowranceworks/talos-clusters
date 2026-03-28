@@ -5,14 +5,16 @@ Encrypted Talos Kubernetes cluster configurations managed with [SOPS](https://gi
 ## Repository Structure
 
 ```
-clusters/{team}/{lifecycle}/{provider}/{region}/{purpose}-cluster/
+{org}/{team}/{lifecycle}/{provider}/{region}/{purpose}-cluster/
 ```
 
 **Example:**
-- `clusters/platform/prod/proxmox/home/platform-cluster/`
-- `clusters/swe/dev/proxmox/home/lawnops-cluster/`
+- `lowranceworks/personal/prod/proxmox/home/personal-cluster/`
+- `lawnops/platform/prod/proxmox/home/platform-cluster/`
+- `lawnops/swe/dev/proxmox/home/lawnops-cluster/`
 
 **Directory components:**
+- `org` - Github Organization (lowranceworks, lawnops)
 - `team` - Team/department (platform, swe, data)
 - `lifecycle` - Environment (prod, dev, staging)
 - `provider` - Infrastructure provider (proxmox, aws, gcp)
@@ -34,9 +36,6 @@ clusters/{team}/{lifecycle}/{provider}/{region}/{purpose}-cluster/
 # Decrypt files for local work
 task decrypt:all
 
-# Make your changes
-vim controlplane-01.yaml
-
 # Re-encrypt before committing
 task encrypt:all
 
@@ -46,36 +45,35 @@ git commit -m "Update configuration"
 git push
 ```
 
-
 ### Applying Configuration
 
 ```sh
 # Change directory to respective cluster (direnv will read .env to source the kubeconfig context)
-cd ./clusters/platform/prod/proxmox/home/platform-cluster/
+cd ./lawnops/platform/prod/proxmox/home/platform-cluster/
 
 # Apply the updated configuration to each node
 talosctl apply-config \
   --nodes $CONTROLPLANE_01_IP \
   --file controlplane.yaml \
-  --config-patch @talos-cp-01.patch.yaml \
+  --config-patch @controlplane-01.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_01_IP \
-  --config-patch @talos-worker-01.patch.yaml \
+  --config-patch @worker-01.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_02_IP \
-  --config-patch @talos-worker-02.patch.yaml \
+  --config-patch @worker-02.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_03_IP \
-  --config-patch @talos-worker-03.patch.yaml \
+  --config-patch @worker-03.patch.yaml \
   --config-patch @tailscale.patch.yaml
 ```
 
