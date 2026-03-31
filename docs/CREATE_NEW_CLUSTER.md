@@ -12,31 +12,30 @@ I do this through [Proxmox]().
 
 I've decided to organize my directory structure like this:
 
+```
+proxmox-homelab/{org}/{team}/{lifecycle}/{purpose}-cluster/
+```
+
 ```stdout
 .
-├── lawnops
-│   ├── platform
-│   │   └── prod
-│   │       └── proxmox
-│   │           └── home
-│   │               └── platform-cluster
-│   └── swe
-│       └── dev
-│           └── proxmox
-│               └── home
-│                   └── lawnops-cluster
-└── lowranceworks
-    └── personal
-        └── prod
-            └── proxmox
-                └── home
-                    └── personal-cluster
+└── proxmox-homelab
+    ├── lawnops
+    │   ├── platform
+    │   │   └── prod
+    │   │       └── platform-cluster
+    │   └── swe
+    │       └── dev
+    │           └── lawnops-cluster
+    └── lowranceworks
+        └── personal
+            └── prod
+                └── personal-cluster
 ```
 
 I've already created the directory structure, I will change into this directory:
 
 ```sh
-cd ./talos-cluster-config/lowranceworks/personal/prod/proxmox/home/personal-cluster
+cd ./proxmox-homelab/lowranceworks/personal/prod/personal-cluster
 ```
 
 **Find available IP addresses on your network**
