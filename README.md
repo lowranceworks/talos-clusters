@@ -5,20 +5,61 @@ Encrypted Talos Kubernetes cluster configurations managed with [SOPS](https://gi
 ## Repository Structure
 
 ```
-{org}/{team}/{lifecycle}/{provider}/{region}/{purpose}-cluster/
+proxmox-homelab/{org}/{team}/{lifecycle}/{purpose}-cluster/
 ```
 
 **Example:**
-- `lowranceworks/personal/prod/proxmox/home/personal-cluster/`
-- `lawnops/platform/prod/proxmox/home/platform-cluster/`
-- `lawnops/swe/dev/proxmox/home/lawnops-cluster/`
+- `proxmox-homelab/lowranceworks/personal/prod/personal-cluster/`
+- `proxmox-homelab/lawnops/platform/prod/platform-cluster/`
+- `proxmox-homelab/lawnops/swe/dev/lawnops-cluster/`
+
+**Full directory tree:**
+
+```
+.
+├── Taskfile.yaml
+├── docs/
+│   ├── CREATE_NEW_CLUSTER.md
+│   └── UPGRADE_CLUSTER.md
+└── proxmox-homelab/
+    ├── lawnops/
+    │   ├── platform/
+    │   │   └── prod/
+    │   │       └── platform-cluster/
+    │   │           ├── .env
+    │   │           ├── .envrc
+    │   │           ├── talos-cp-01.patch.yaml
+    │   │           ├── talos-worker-01.patch.yaml
+    │   │           ├── talos-worker-02.patch.yaml
+    │   │           └── talos-worker-03.patch.yaml
+    │   └── swe/
+    │       └── dev/
+    │           └── lawnops-cluster/
+    │               ├── .env
+    │               ├── .envrc
+    │               ├── talos-cp-01.patch.yaml
+    │               ├── talos-worker-01.patch.yaml
+    │               ├── talos-worker-02.patch.yaml
+    │               └── talos-worker-03.patch.yaml
+    └── lowranceworks/
+        └── personal/
+            └── prod/
+                └── personal-cluster/
+                    ├── .env
+                    ├── .envrc
+                    ├── controlplane-01.patch.yaml
+                    ├── worker-01.patch.yaml
+                    ├── worker-02.patch.yaml
+                    └── worker-03.patch.yaml
+```
+
+> Encrypted files (`controlplane.yaml`, `worker.yaml`, `kubeconfig`, `talosconfig`, `secrets.yaml`, `tailscale.patch.yaml`) are gitignored and only committed in their encrypted form (`.enc.yaml`, `.enc`). They will appear in the cluster directories after running `task decrypt:all`.
 
 **Directory components:**
+- `proxmox-homelab` - Infrastructure provider / homelab root
 - `org` - Github Organization (lowranceworks, lawnops)
-- `team` - Team/department (platform, swe, data)
+- `team` - Team/department (platform, swe, personal)
 - `lifecycle` - Environment (prod, dev, staging)
-- `provider` - Infrastructure provider (proxmox, aws, gcp)
-- `region` - Location (home, us-east-1, eu-west-1)
 - `purpose` - Cluster name/purpose
 
 ## Quick Start
@@ -49,31 +90,31 @@ git push
 
 ```sh
 # Change directory to respective cluster (direnv will read .env to source the kubeconfig context)
-cd ./lawnops/platform/prod/proxmox/home/platform-cluster/
+cd ./proxmox-homelab/lawnops/platform/prod/platform-cluster/
 
 # Apply the updated configuration to each node
 talosctl apply-config \
   --nodes $CONTROLPLANE_01_IP \
   --file controlplane.yaml \
-  --config-patch @controlplane-01.patch.yaml \
+  --config-patch @talos-cp-01.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_01_IP \
-  --config-patch @worker-01.patch.yaml \
+  --config-patch @talos-worker-01.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_02_IP \
-  --config-patch @worker-02.patch.yaml \
+  --config-patch @talos-worker-02.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_03_IP \
-  --config-patch @worker-03.patch.yaml \
+  --config-patch @talos-worker-03.patch.yaml \
   --config-patch @tailscale.patch.yaml
 ```
 
@@ -92,8 +133,9 @@ talosctl apply-config \
 
 ## File Naming
 
-- **Decrypted (local only)**: `worker-01.yaml`, `kubeconfig`, `.env`
-- **Encrypted (committed)**: `worker-01.enc.yaml`, `kubeconfig.enc`, `.env.enc`
+- **Decrypted (local only)**: `controlplane.yaml`, `worker.yaml`, `kubeconfig`, `talosconfig`, `secrets.yaml`, `tailscale.patch.yaml`
+- **Encrypted (committed)**: `controlplane.enc.yaml`, `worker.enc.yaml`, `kubeconfig.enc`, `talosconfig.enc`, `secrets.enc.yaml`, `tailscale.patch.enc.yaml`
+- **Always committed**: `.env`, `.envrc`, `*-cp-*.patch.yaml`, `*-worker-*.patch.yaml`
 
 ## Security
 
