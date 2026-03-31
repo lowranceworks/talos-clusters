@@ -5,13 +5,13 @@ Encrypted Talos Kubernetes cluster configurations managed with [SOPS](https://gi
 ## Repository Structure
 
 ```
-proxmox-homelab/{org}/{team}/{lifecycle}/{purpose}-cluster/
+proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
 ```
 
 **Example:**
-- `proxmox-homelab/lowranceworks/personal/prod/personal-cluster/`
-- `proxmox-homelab/lawnops/platform/prod/platform-cluster/`
-- `proxmox-homelab/lawnops/swe/dev/lawnops-cluster/`
+- `proxmox-homelab/lowranceworks/personal/prod/`
+- `proxmox-homelab/lawnops/prod/platform-cluster/`
+- `proxmox-homelab/lawnops/dev/lawnops-cluster/`
 
 **Full directory tree:**
 
@@ -23,44 +23,40 @@ proxmox-homelab/{org}/{team}/{lifecycle}/{purpose}-cluster/
 │   └── UPGRADE_CLUSTER.md
 └── proxmox-homelab/
     ├── lawnops/
-    │   ├── platform/
-    │   │   └── prod/
-    │   │       └── platform-cluster/
-    │   │           ├── .env
-    │   │           ├── .envrc
-    │   │           ├── controlplane-01.patch.yaml
-    │   │           ├── worker-01.patch.yaml
-    │   │           ├── worker-02.patch.yaml
-    │   │           └── worker-03.patch.yaml
-    │   └── swe/
-    │       └── dev/
-    │           └── lawnops-cluster/
-    │               ├── .env
-    │               ├── .envrc
-    │               ├── controlplane-01.patch.yaml
-    │               ├── worker-01.patch.yaml
-    │               ├── worker-02.patch.yaml
-    │               └── worker-03.patch.yaml
+    │   ├── dev/
+    │   │   └── lawnops-cluster/
+    │   │       ├── .env
+    │   │       ├── .envrc
+    │   │       ├── controlplane-01.patch.yaml
+    │   │       ├── worker-01.patch.yaml
+    │   │       ├── worker-02.patch.yaml
+    │   │       └── worker-03.patch.yaml
+    │   └── prod/
+    │       └── platform-cluster/
+    │           ├── .env
+    │           ├── .envrc
+    │           ├── controlplane-01.patch.yaml
+    │           ├── worker-01.patch.yaml
+    │           ├── worker-02.patch.yaml
+    │           └── worker-03.patch.yaml
     └── lowranceworks/
         └── personal/
             └── prod/
-                └── personal-cluster/
-                    ├── .env
-                    ├── .envrc
-                    ├── controlplane-01.patch.yaml
-                    ├── worker-01.patch.yaml
-                    ├── worker-02.patch.yaml
-                    └── worker-03.patch.yaml
+                ├── .env
+                ├── .envrc
+                ├── controlplane-01.patch.yaml
+                ├── worker-01.patch.yaml
+                ├── worker-02.patch.yaml
+                └── worker-03.patch.yaml
 ```
 
-> Encrypted files (`controlplane.yaml`, `worker.yaml`, `kubeconfig`, `talosconfig`, `secrets.yaml`, `tailscale.patch.yaml`) are gitignored and only committed in their encrypted form (`.enc.yaml`, `.enc`). They will appear in the cluster directories after running `task decrypt:all`.
+> Encrypted files (`controlplane.yaml`, `worker.yaml`, `secrets.yaml`) are gitignored and only committed in their encrypted form (`.enc.yaml`). They will appear in the cluster directories after running `task decrypt:all`.
 
 **Directory components:**
 - `proxmox-homelab` - Infrastructure provider / homelab root
 - `org` - Github Organization (lowranceworks, lawnops)
-- `team` - Team/department (platform, swe, personal)
 - `lifecycle` - Environment (prod, dev, staging)
-- `purpose` - Cluster name/purpose
+- `purpose` - Cluster name/purpose (omitted when org path is sufficient)
 
 ## Quick Start
 
@@ -69,7 +65,13 @@ proxmox-homelab/{org}/{team}/{lifecycle}/{purpose}-cluster/
 - [Task](https://taskfile.dev/)
 - [SOPS](https://github.com/getsops/sops)
 - [talosctl](https://www.talos.dev/)
-- GPG key matching `.sops.yaml`
+- GPG key at `~/.keys/sops/local` (fingerprint: `46A08BAEF7DB948F66897A69C6D12C69DB830D3B`)
+
+To import the key on a new machine:
+
+```bash
+gpg --import ~/.keys/sops/local
+```
 
 ### Basic Workflow
 
@@ -90,31 +92,13 @@ git push
 
 ```sh
 # Change directory to respective cluster (direnv will read .env to source the kubeconfig context)
-cd ./proxmox-homelab/lawnops/platform/prod/platform-cluster/
+cd ./proxmox-homelab/lawnops/prod/platform-cluster/
 
 # Apply the updated configuration to each node
 talosctl apply-config \
   --nodes $CONTROLPLANE_01_IP \
   --file controlplane.yaml \
   --config-patch @controlplane-01.patch.yaml \
-  --config-patch @tailscale.patch.yaml
-
-talosctl apply-config \
-  --file worker.yaml \
-  --nodes $WORKER_01_IP \
-  --config-patch @worker-01.patch.yaml \
-  --config-patch @tailscale.patch.yaml
-
-talosctl apply-config \
-  --file worker.yaml \
-  --nodes $WORKER_02_IP \
-  --config-patch @worker-02.patch.yaml \
-  --config-patch @tailscale.patch.yaml
-
-talosctl apply-config \
-  --file worker.yaml \
-  --nodes $WORKER_03_IP \
-  --config-patch @worker-03.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
@@ -148,9 +132,9 @@ talosctl apply-config \
 
 ## File Naming
 
-- **Decrypted (local only)**: `controlplane.yaml`, `worker.yaml`, `kubeconfig`, `talosconfig`, `secrets.yaml`, `tailscale.patch.yaml`
-- **Encrypted (committed)**: `controlplane.enc.yaml`, `worker.enc.yaml`, `kubeconfig.enc`, `talosconfig.enc`, `secrets.enc.yaml`, `tailscale.patch.enc.yaml`
-- **Always committed**: `.env`, `.envrc`, `*-controlplane-*.patch.yaml`, `*-worker-*.patch.yaml`
+- **Decrypted (local only)**: `controlplane.yaml`, `worker.yaml`, `secrets.yaml`
+- **Encrypted (committed)**: `controlplane.enc.yaml`, `worker.enc.yaml`, `secrets.enc.yaml`
+- **Always committed**: `.env`, `.envrc`, `controlplane-*.patch.yaml`, `worker-*.patch.yaml`
 
 ## Security
 

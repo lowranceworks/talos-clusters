@@ -13,29 +13,26 @@ I do this through [Proxmox]().
 I've decided to organize my directory structure like this:
 
 ```
-proxmox-homelab/{org}/{team}/{lifecycle}/{purpose}-cluster/
+proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
 ```
 
 ```stdout
 .
 └── proxmox-homelab
     ├── lawnops
-    │   ├── platform
-    │   │   └── prod
-    │   │       └── platform-cluster
-    │   └── swe
-    │       └── dev
-    │           └── lawnops-cluster
+    │   ├── dev
+    │   │   └── lawnops-cluster
+    │   └── prod
+    │       └── platform-cluster
     └── lowranceworks
         └── personal
             └── prod
-                └── personal-cluster
 ```
 
 I've already created the directory structure, I will change into this directory:
 
 ```sh
-cd ./proxmox-homelab/lowranceworks/personal/prod/personal-cluster
+cd ./proxmox-homelab/lowranceworks/personal/prod
 ```
 
 **Find available IP addresses on your network**
