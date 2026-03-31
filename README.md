@@ -9,7 +9,7 @@ proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
 ```
 
 **Example:**
-- `proxmox-homelab/lowranceworks/personal/prod/`
+- `proxmox-homelab/lowranceworks/prod/personal-cluster/`
 - `proxmox-homelab/lawnops/prod/platform-cluster/`
 - `proxmox-homelab/lawnops/dev/lawnops-cluster/`
 
@@ -40,8 +40,8 @@ proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
     │           ├── worker-02.patch.yaml
     │           └── worker-03.patch.yaml
     └── lowranceworks/
-        └── personal/
-            └── prod/
+        └── prod/
+            └── personal-cluster/
                 ├── .env
                 ├── .envrc
                 ├── controlplane-01.patch.yaml
@@ -56,7 +56,7 @@ proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
 - `proxmox-homelab` - Infrastructure provider / homelab root
 - `org` - Github Organization (lowranceworks, lawnops)
 - `lifecycle` - Environment (prod, dev, staging)
-- `purpose` - Cluster name/purpose (omitted when org path is sufficient)
+- `purpose` - Cluster name/purpose
 
 ## Quick Start
 

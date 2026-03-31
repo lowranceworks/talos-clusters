@@ -25,8 +25,8 @@ proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
     │   └── prod
     │       └── platform-cluster
     └── lowranceworks
-        └── personal
-            └── prod
+        └── prod
+            └── personal-cluster
 ```
 
 I've already created the directory structure, I will change into this directory:
