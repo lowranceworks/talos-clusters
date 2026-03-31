@@ -28,19 +28,19 @@ proxmox-homelab/{org}/{team}/{lifecycle}/{purpose}-cluster/
     │   │       └── platform-cluster/
     │   │           ├── .env
     │   │           ├── .envrc
-    │   │           ├── talos-cp-01.patch.yaml
-    │   │           ├── talos-worker-01.patch.yaml
-    │   │           ├── talos-worker-02.patch.yaml
-    │   │           └── talos-worker-03.patch.yaml
+    │   │           ├── controlplane-01.patch.yaml
+    │   │           ├── worker-01.patch.yaml
+    │   │           ├── worker-02.patch.yaml
+    │   │           └── worker-03.patch.yaml
     │   └── swe/
     │       └── dev/
     │           └── lawnops-cluster/
     │               ├── .env
     │               ├── .envrc
-    │               ├── talos-cp-01.patch.yaml
-    │               ├── talos-worker-01.patch.yaml
-    │               ├── talos-worker-02.patch.yaml
-    │               └── talos-worker-03.patch.yaml
+    │               ├── controlplane-01.patch.yaml
+    │               ├── worker-01.patch.yaml
+    │               ├── worker-02.patch.yaml
+    │               └── worker-03.patch.yaml
     └── lowranceworks/
         └── personal/
             └── prod/
@@ -96,25 +96,43 @@ cd ./proxmox-homelab/lawnops/platform/prod/platform-cluster/
 talosctl apply-config \
   --nodes $CONTROLPLANE_01_IP \
   --file controlplane.yaml \
-  --config-patch @talos-cp-01.patch.yaml \
+  --config-patch @controlplane-01.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_01_IP \
-  --config-patch @talos-worker-01.patch.yaml \
+  --config-patch @worker-01.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_02_IP \
-  --config-patch @talos-worker-02.patch.yaml \
+  --config-patch @worker-02.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_03_IP \
-  --config-patch @talos-worker-03.patch.yaml \
+  --config-patch @worker-03.patch.yaml \
+  --config-patch @tailscale.patch.yaml
+
+talosctl apply-config \
+  --file worker.yaml \
+  --nodes $WORKER_01_IP \
+  --config-patch @worker-01.patch.yaml \
+  --config-patch @tailscale.patch.yaml
+
+talosctl apply-config \
+  --file worker.yaml \
+  --nodes $WORKER_02_IP \
+  --config-patch @worker-02.patch.yaml \
+  --config-patch @tailscale.patch.yaml
+
+talosctl apply-config \
+  --file worker.yaml \
+  --nodes $WORKER_03_IP \
+  --config-patch @worker-03.patch.yaml \
   --config-patch @tailscale.patch.yaml
 ```
 
@@ -122,20 +140,17 @@ talosctl apply-config \
 
 | Command | Description |
 |---------|-------------|
-| `task encrypt:all` | Encrypt all files (creates `.enc.yaml` and `.enc` files) |
-| `task decrypt:all` | Decrypt all files (removes encrypted versions) |
-| `task encrypt:file FILE=path` | Encrypt a specific file |
-| `task decrypt:file FILE=path` | Decrypt a specific file |
-| `task edit FILE=path` | Edit encrypted file with SOPS |
-| `task status` | Check encryption status |
-| `task validate` | Verify all encrypted files |
-| `task clean:decrypted` | Remove decrypted files |
+| `task encrypt:all` | Encrypt all sensitive files across all clusters |
+| `task decrypt:all` | Decrypt all `.enc` files across all clusters |
+| `task status` | Check encryption status of all clusters |
+| `task validate` | Verify all encrypted files can be decrypted |
+| `task clean:decrypted` | Remove all decrypted files across all clusters |
 
 ## File Naming
 
 - **Decrypted (local only)**: `controlplane.yaml`, `worker.yaml`, `kubeconfig`, `talosconfig`, `secrets.yaml`, `tailscale.patch.yaml`
 - **Encrypted (committed)**: `controlplane.enc.yaml`, `worker.enc.yaml`, `kubeconfig.enc`, `talosconfig.enc`, `secrets.enc.yaml`, `tailscale.patch.enc.yaml`
-- **Always committed**: `.env`, `.envrc`, `*-cp-*.patch.yaml`, `*-worker-*.patch.yaml`
+- **Always committed**: `.env`, `.envrc`, `*-controlplane-*.patch.yaml`, `*-worker-*.patch.yaml`
 
 ## Security
 
