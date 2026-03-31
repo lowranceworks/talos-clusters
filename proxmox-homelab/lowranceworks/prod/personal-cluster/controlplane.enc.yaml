@@ -391,7 +391,7 @@ cluster:
         # Endpoint is the canonical controlplane endpoint, which can be an IP address or a DNS hostname.
         endpoint: https://192.168.1.117:6443
     # Configures the cluster's name.
-    clusterName: personal-cluster
+    clusterName: prod-personal-cluster
     # Provides cluster specific network configuration options.
     network:
         # The domain used by Kubernetes DNS.

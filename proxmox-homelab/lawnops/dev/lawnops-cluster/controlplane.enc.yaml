@@ -391,7 +391,7 @@ cluster:
         # Endpoint is the canonical controlplane endpoint, which can be an IP address or a DNS hostname.
         endpoint: https://192.168.1.220:6443
     # Configures the cluster's name.
-    clusterName: dev-proxmox-home-lawnops-cluster
+    clusterName: dev-lawnops-cluster
     # Provides cluster specific network configuration options.
     network: {}
     # The [bootstrap token](https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/) used to join the cluster.

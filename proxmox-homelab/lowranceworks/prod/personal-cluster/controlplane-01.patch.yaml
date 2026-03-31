@@ -1,7 +1,7 @@
 machine:
     # Static IP Configuration
     network:
-        hostname: personal-prod-cp-01
+        hostname: prod-personal-cp-01
         interfaces:
             - interface: eth0
               addresses:
