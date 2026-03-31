@@ -210,18 +210,14 @@ touch tailscale.patch.yaml
 `tailscale.patch.yaml`:
 
 ```yaml
-machine:
-    files:
-        - content: |
-              TS_AUTHKEY=tskey-auth-xxxxx-xxxxxxxxxxxxxxxxxx
-              TS_EXTRA_ARGS=--advertise-tags=tag:kubernetes
-              TS_ACCEPT_DNS=false
-          path: /var/etc/tailscale/auth.env
-          permissions: 0o600
-          op: create
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: tailscale
+environment:
+  - TS_AUTHKEY=tskey-auth-your-authkey-here
 ```
 
-Replace `tskey-auth-xxxxx-xxxxxxxxxxxxxxxxxx` with the auth key you generated earlier.
+Replace `tskey-auth-your-authkey-here` with the auth key you generated earlier.
 
 > **Tip:** If you want each node to have a recognizable hostname in your Tailnet, you can add `TS_EXTRA_ARGS=--advertise-tags=tag:kubernetes --hostname=personal-cp-01` and create per-node Tailscale patches instead. For simplicity, a single shared patch works — Tailscale will use the machine's hostname by default.
 
