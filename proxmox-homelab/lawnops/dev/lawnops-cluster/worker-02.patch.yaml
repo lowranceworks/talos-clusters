@@ -1,11 +1,11 @@
 machine:
     # Static IP Configuration
     network:
-        hostname: platform-prod-proxmox-home-platform-worker-03
+        hostname: dev-lawnops-worker-02
         interfaces:
             - interface: eth0
               addresses:
-                - 192.168.1.153/24
+                - 192.168.1.222/24
               routes:
                 - network: 0.0.0.0/0
                   gateway: 192.168.1.254

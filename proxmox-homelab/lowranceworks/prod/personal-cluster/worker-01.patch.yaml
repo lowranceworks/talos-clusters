@@ -1,11 +1,11 @@
 machine:
     # Static IP Configuration
     network:
-        hostname: platform-prod-proxmox-home-platform-worker-02
+        hostname: prod-personal-worker-01
         interfaces:
             - interface: eth0
               addresses:
-                - 192.168.1.152/24
+                - 192.168.1.231/24
               routes:
                 - network: 0.0.0.0/0
                   gateway: 192.168.1.254

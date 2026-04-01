@@ -1,26 +1,26 @@
 version: '3'
 
 vars:
+  CLUSTER_ROOT: "proxmox-homelab"
   YAML_FILES: "controlplane.yaml worker.yaml tailscale.patch.yaml secrets.yaml"
   CONFIG_FILES: "kubeconfig talosconfig"
 
 tasks:
   encrypt:all:
-    desc: Encrypt all sensitive files
-    dir: "{{.USER_WORKING_DIR}}"
+    desc: Encrypt all sensitive files across all clusters
     cmds:
       - task: encrypt:yaml
       - task: encrypt:configs
 
   encrypt:yaml:
-    desc: Encrypt YAML files (controlplane.yaml, worker.yaml)
-    dir: "{{.USER_WORKING_DIR}}"
+    desc: Encrypt YAML files (controlplane.yaml, worker.yaml, tailscale.patch.yaml, secrets.yaml)
     cmds:
       - |
-        for file in {{.YAML_FILES}}; do
-          if [ -f "$file" ]; then
-            enc_file="${file%.yaml}.enc.yaml"
-            
+        for name in {{.YAML_FILES}}; do
+          find {{.CLUSTER_ROOT}} -name "$name" -type f | while read -r file; do
+            dir=$(dirname "$file")
+            enc_file="${dir}/${name%.yaml}.enc.yaml"
+
             if [ -f "$enc_file" ]; then
               echo "Encrypted version already exists: $enc_file, skipping..."
             else
@@ -28,135 +28,179 @@ tasks:
               sops --encrypt "$file" > "$enc_file"
               rm "$file"
             fi
-          fi
+          done
         done
 
   encrypt:configs:
     desc: Encrypt config files (kubeconfig, talosconfig)
-    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - |
-        for file in {{.CONFIG_FILES}}; do
-          if [ -f "$file" ]; then
-            enc_file="${file}.enc"
-            
+        for name in {{.CONFIG_FILES}}; do
+          find {{.CLUSTER_ROOT}} -name "$name" -type f | while read -r file; do
+            dir=$(dirname "$file")
+            enc_file="${dir}/${name}.enc"
+
             if [ -f "$enc_file" ]; then
               echo "Encrypted version already exists: $enc_file, skipping..."
             else
               echo "Encrypting $file -> $enc_file"
-              sops --encrypt --input-type binary --output-type binary "$file" > "$enc_file"
+              sops --encrypt --input-type yaml --output-type yaml "$file" > "$enc_file"
               rm "$file"
             fi
-          fi
+          done
         done
 
   decrypt:all:
-    desc: Decrypt all .enc files to their original names
-    dir: "{{.USER_WORKING_DIR}}"
+    desc: Decrypt all .enc files across all clusters
     cmds:
       - task: decrypt:yaml
       - task: decrypt:configs
 
   decrypt:yaml:
     desc: Decrypt YAML files
-    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - |
-        for file in {{.YAML_FILES}}; do
-          enc_file="${file%.yaml}.enc.yaml"
-          if [ -f "$enc_file" ]; then
+        for name in {{.YAML_FILES}}; do
+          enc_name="${name%.yaml}.enc.yaml"
+          find {{.CLUSTER_ROOT}} -name "$enc_name" -type f | while read -r enc_file; do
+            dir=$(dirname "$enc_file")
+            file="${dir}/${name}"
+
             if ! grep -q "sops:" "$enc_file" 2>/dev/null; then
               echo "⚠ Skipping $enc_file - not encrypted with SOPS"
               continue
             fi
-            
+
             echo "Decrypting $enc_file -> $file"
             sops --decrypt "$enc_file" > "$file"
             rm "$enc_file"
-          fi
+          done
         done
 
   decrypt:configs:
     desc: Decrypt config files
-    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - |
-        for file in {{.CONFIG_FILES}}; do
-          enc_file="${file}.enc"
-          if [ -f "$enc_file" ]; then
+        for name in {{.CONFIG_FILES}}; do
+          enc_name="${name}.enc"
+          find {{.CLUSTER_ROOT}} -name "$enc_name" -type f | while read -r enc_file; do
+            dir=$(dirname "$enc_file")
+            file="${dir}/${name}"
+
             echo "Decrypting $enc_file -> $file"
-            if sops --decrypt --input-type binary --output-type binary "$enc_file" > "$file" 2>/dev/null; then
+            if sops --decrypt --input-type yaml --output-type yaml "$enc_file" > "$file" 2>/dev/null; then
               rm "$enc_file"
             else
               echo "⚠ Failed to decrypt $enc_file"
               rm "$file"
             fi
-          fi
+          done
         done
 
   status:
-    desc: Check encryption status of files
-    dir: "{{.USER_WORKING_DIR}}"
+    desc: Check encryption status of all clusters
     cmds:
       - |
         echo "=== Encryption Status ==="
-        echo ""
-        echo "YAML Files:"
-        for file in {{.YAML_FILES}}; do
-          enc_file="${file%.yaml}.enc.yaml"
-          if [ -f "$enc_file" ]; then
-            echo "  ✓ $file (encrypted as $enc_file)"
-          elif [ -f "$file" ]; then
-            echo "  ✗ $file (unencrypted)"
-          else
-            echo "  - $file (not found)"
+
+        find {{.CLUSTER_ROOT}} -mindepth 1 -type d | sort | while read -r dir; do
+          has_files=false
+
+          for name in {{.YAML_FILES}}; do
+            enc_name="${name%.yaml}.enc.yaml"
+            if [ -f "$dir/$enc_name" ] || [ -f "$dir/$name" ]; then
+              has_files=true
+              break
+            fi
+          done
+
+          if [ "$has_files" = false ]; then
+            for name in {{.CONFIG_FILES}}; do
+              enc_name="${name}.enc"
+              if [ -f "$dir/$enc_name" ] || [ -f "$dir/$name" ]; then
+                has_files=true
+                break
+              fi
+            done
           fi
-        done
-        echo ""
-        echo "Config Files:"
-        for file in {{.CONFIG_FILES}}; do
-          enc_file="${file}.enc"
-          if [ -f "$enc_file" ]; then
-            echo "  ✓ $file (encrypted as $enc_file)"
-          elif [ -f "$file" ]; then
-            echo "  ✗ $file (unencrypted)"
-          else
-            echo "  - $file (not found)"
-          fi
+
+          [ "$has_files" = false ] && continue
+
+          echo ""
+          echo "[$dir]"
+
+          for name in {{.YAML_FILES}}; do
+            enc_name="${name%.yaml}.enc.yaml"
+            if [ -f "$dir/$enc_name" ]; then
+              echo "  ✓ $name (encrypted)"
+            elif [ -f "$dir/$name" ]; then
+              echo "  ✗ $name (unencrypted)"
+            fi
+          done
+
+          for name in {{.CONFIG_FILES}}; do
+            enc_name="${name}.enc"
+            if [ -f "$dir/$enc_name" ]; then
+              echo "  ✓ $name (encrypted)"
+            elif [ -f "$dir/$name" ]; then
+              echo "  ✗ $name (unencrypted)"
+            fi
+          done
         done
 
   validate:
     desc: Validate that all .enc files can be decrypted
-    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - |
         echo "=== Validating Encrypted Files ==="
         failed=0
 
-        for file in {{.YAML_FILES}}; do
-          enc_file="${file%.yaml}.enc.yaml"
-          if [ -f "$enc_file" ]; then
+        for name in {{.YAML_FILES}}; do
+          enc_name="${name%.yaml}.enc.yaml"
+          find {{.CLUSTER_ROOT}} -name "$enc_name" -type f | while read -r enc_file; do
             if sops --decrypt "$enc_file" > /dev/null 2>&1; then
               echo "  ✓ $enc_file"
             else
               echo "  ✗ $enc_file (failed to decrypt)"
-              failed=1
+              echo "FAILED" > /tmp/taskfile_validate_failed
             fi
-          fi
+          done
         done
 
-        for file in {{.CONFIG_FILES}}; do
-          enc_file="${file}.enc"
-          if [ -f "$enc_file" ]; then
-            if sops --decrypt --input-type binary --output-type binary "$enc_file" > /dev/null 2>&1; then
+        for name in {{.CONFIG_FILES}}; do
+          enc_name="${name}.enc"
+          find {{.CLUSTER_ROOT}} -name "$enc_name" -type f | while read -r enc_file; do
+            if sops --decrypt --input-type yaml --output-type yaml "$enc_file" > /dev/null 2>&1; then
               echo "  ✓ $enc_file"
             else
               echo "  ✗ $enc_file (failed to decrypt)"
-              failed=1
+              echo "FAILED" > /tmp/taskfile_validate_failed
             fi
-          fi
+          done
         done
 
-        [ $failed -eq 1 ] && exit 1
+        if [ -f /tmp/taskfile_validate_failed ]; then
+          rm /tmp/taskfile_validate_failed
+          exit 1
+        fi
+
         echo ""
         echo "All encrypted files validated successfully!"
+
+  clean:decrypted:
+    desc: Remove all decrypted files across all clusters
+    cmds:
+      - |
+        for name in {{.YAML_FILES}}; do
+          find {{.CLUSTER_ROOT}} -name "$name" -type f | while read -r file; do
+            echo "Removing $file"
+            rm "$file"
+          done
+        done
+
+        for name in {{.CONFIG_FILES}}; do
+          find {{.CLUSTER_ROOT}} -name "$name" -type f | while read -r file; do
+            echo "Removing $file"
+            rm "$file"
+          done
+        done

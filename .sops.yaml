@@ -1,18 +1,13 @@
 creation_rules:
-  # Talos secrets.yaml files
-  - path_regex: secrets\.yaml$
-    encrypted_regex: "^(id|secret|bootstraptoken|secretboxencryptionsecret|token|crt|key)$"
+  # Config files (kubeconfig, talosconfig) - encrypt sensitive keys
+  - path_regex: (kubeconfig|talosconfig)$
+    encrypted_regex: "^(certificate-authority-data|client-certificate-data|client-key-data|ca|crt|key)$"
     pgp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
-  
-  # Tailscale patch files - encrypt the entire environment array
-  - path_regex: tailscale.*\.yaml$
-    encrypted_regex: "^(environment|TS_AUTHKEY)$"
-    pgp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
-  
-  # Talos machine/cluster config YAML files
+
+  # All YAML files - encrypt sensitive keys
   - path_regex: .*\.yaml$
-    encrypted_regex: "^(token|secret|endpoint|crt|key)$"
+    encrypted_regex: "^(ca|crt|id|secret|secretboxencryptionsecret|token|bootstraptoken|key|environment|TS_AUTHKEY)$"
     pgp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
-  
+
   # Fallback for any other files
   - pgp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B

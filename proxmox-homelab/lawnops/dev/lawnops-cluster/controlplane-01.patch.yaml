@@ -1,7 +1,7 @@
 machine:
     # Static IP Configuration
     network:
-        hostname: swe-dev-proxmox-home-lawnops-cp-01
+        hostname: dev-lawnops-cp-01
         interfaces:
             - interface: eth0
               addresses:
