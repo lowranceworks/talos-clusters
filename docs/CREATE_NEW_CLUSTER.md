@@ -1,153 +1,112 @@
 # Create New Cluster
 
+## Prerequisites
+
+- [Proxmox](https://www.proxmox.com/) VMs provisioned with the Talos Factory ISO
+- [talosctl](https://www.talos.dev/) installed
+- [direnv](https://direnv.net/) installed and hooked into your shell
+- [Task](https://taskfile.dev/) installed
+- [SOPS](https://github.com/getsops/sops) installed with GPG key imported
+- A [Tailscale](https://tailscale.com) account and auth key
+
+### Talos Factory Image
+
+Use a Talos Factory image that includes system extensions. Download the ISO from:
+
+```
+https://factory.talos.dev/?arch=amd64&extensions=siderolabs%2Ftailscale&version=1.12.0
+```
+
+Direct ISO download:
+
+```
+https://factory.talos.dev/image/077514df2c1b6436460bc60faabc976687b16193b8a1290fda4366c69024fec2/v1.12.0/nocloud-amd64.iso
+```
+
+This image includes: iscsi-tools, qemu-guest-agent, tailscale, util-linux-tools.
+
+> **Important:** You must use a factory image that includes the Tailscale extension. If you use the default Talos ISO, the Tailscale service will not be available even if you apply the tailscale patch.
+
+### Tailscale Auth Key
+
+Create an auth key from the [Tailscale admin console](https://login.tailscale.com/admin/settings/keys). The key is used to register nodes with your Tailnet.
+
+> **Note:** Auth keys expire after a maximum of 90 days. This does not remove existing nodes from the Tailnet -- it only means the key can no longer register new nodes.
+
 ## Create Virtual Servers
 
-I do this through [Proxmox]().
+Create VMs in Proxmox using the Talos Factory ISO. Boot each VM and note the DHCP-assigned IP addresses displayed on the console.
 
 ## Configuration Steps
 
-### Preperation for configuration
-
-**Define where your configuration will live**
-
-I've decided to organize my directory structure like this:
+### Directory structure
 
 ```
 proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
 ```
 
-```stdout
-.
-└── proxmox-homelab
-    ├── lawnops
-    │   ├── dev
-    │   │   └── lawnops-cluster
-    │   └── prod
-    │       └── platform-cluster
-    └── lowranceworks
-        └── prod
-            └── personal-cluster
-```
-
-I've already created the directory structure, I will change into this directory:
+Create the directory for your new cluster and `cd` into it:
 
 ```sh
-cd ./proxmox-homelab/lowranceworks/personal/prod
+mkdir -p proxmox-homelab/lowranceworks/prod/personal-cluster
+cd proxmox-homelab/lowranceworks/prod/personal-cluster
 ```
 
-**Find available IP addresses on your network**
+### Define environment variables
 
-I prefer static IP addresses that I can group together sequentially.
-
-```stdout
- ping 192.168.1.140
-
-PING 192.168.1.140 (192.168.1.140): 56 data bytes
-Request timeout for icmp_seq 0
-Request timeout for icmp_seq 1
-```
-
-```stdout
- ping 192.168.1.141
-
-PING 192.168.1.141 (192.168.1.141): 56 data bytes
-Request timeout for icmp_seq 0
-Request timeout for icmp_seq 1
-```
-
-```stdout
- ping 192.168.1.142
-
-PING 192.168.1.142 (192.168.1.142): 56 data bytes
-Request timeout for icmp_seq 0
-Request timeout for icmp_seq 1
-
-```
-```stdout
- ping 192.168.1.143
-
-PING 192.168.1.143 (192.168.1.143): 56 data bytes
-Request timeout for icmp_seq 0
-Request timeout for icmp_seq 1
-```
-
-**Generate Tailscale API key**
-
-Create a free account with [Tailscale](https://tailscale.com) if you don't already have one.
-
-Review their documentation on [how to create an API key](https://tailscale.com/kb/1085/auth-keys).
-
-Once you've created one, save the key because we will need it later.
-
-> **Note:** The auth key is only valid for a maximum of 90 days. This does not mean your nodes will be removed from the Tailnet after 90 days — it only means the key can no longer be used to add new nodes. You'll need to generate a new one at that point.
-
-### Writing the configuration
-
-**Define Environment Variables**
-
-I prefer to record these in a `.env` file. The `.envrc` loads the `.env` file but can also be used to run commands when you change directory or reload with `direnv reload`.
+Create `.env` and `.envrc` files:
 
 ```sh
-touch .env
-touch .envrc && echo "dotenv .env" >> .envrc
+touch .env .envrc
+echo 'dotenv .env' >> .envrc
 direnv allow
 ```
 
-**Write the current IP addresses assigned to the nodes to `.env`**
+Write the DHCP-assigned IPs to `.env` (these will change to static IPs after applying config):
 
-You can expect these to change later -- it's good idea to document here so we can run the same commands.
-
-```stdout
-CONTROLPLANE_01_IP=192.168.1.117
-KUBECONFIG=./kubeconfig
+```
 TALOSCONFIG=./talosconfig
+KUBECONFIG=./kubeconfig
+CONTROLPLANE_01_IP=192.168.1.117
 WORKER_01_IP=192.168.1.98
 WORKER_02_IP=192.168.1.104
 WORKER_03_IP=192.168.1.242
 ```
 
-Why `KUBECONFIG`? Setting this tells `kubectl` where to find the cluster credentials. By pointing it to a local `./kubeconfig` file, you avoid polluting your global `~/.kube/config` and can work with multiple clusters by simply changing directories.
+- `TALOSCONFIG` -- tells `talosctl` where to find its config. Keeps each cluster isolated.
+- `KUBECONFIG` -- tells `kubectl` where to find cluster credentials. Avoids polluting `~/.kube/config`.
 
-Why `TALOSCONFIG`? Same idea — `talosctl` looks for this environment variable to find its configuration. Keeping it scoped to the cluster directory means each cluster's `talosconfig` stays isolated and you don't have to pass `--talosconfig` on every command.
-
-**Load environment variables**
-
-You need to allow `direnv` to work in your current directory.
+Verify environment variables are loaded:
 
 ```sh
-direnv allow
+direnv reload
+echo $CONTROLPLANE_01_IP $WORKER_01_IP $WORKER_02_IP $WORKER_03_IP
 ```
 
-After doing this, you can verify if your environment variables are loaded into your shell:
+### Generate configuration files
 
 ```sh
-env | grep $TALOSCONFIG
-env | grep $KUBECONFIG
-env | grep $CONTROLPLANE_01_IP
-env | grep $WORKER_01_IP
-env | grep $WORKER_02_IP
-env | grep $WORKER_03_IP
+talosctl gen config <cluster-name> https://$CONTROLPLANE_01_IP:6443 --output-dir .
 ```
 
-**Generate configuration files:**
+This generates: `controlplane.yaml`, `worker.yaml`, `talosconfig`.
+
+#### Set talosconfig endpoints
+
+The generated `talosconfig` has empty endpoints. Set them so you don't need `--endpoints` on every command:
 
 ```sh
-talosctl gen config personal-cluster https://$CONTROLPLANE_01_IP:6443 --output-dir .
+talosctl config endpoint $CONTROLPLANE_01_IP
 ```
 
-**Create patch file for control-plane:**
+> **Note:** After applying static IPs, update the endpoint to the new controlplane IP.
 
-`controlplane-01.patch.yaml`:
+### Create patch files
 
-```sh
-touch controlplane-01.patch.yaml
-```
-
-**Declare configuration for control-plane:**
+**Control plane patch** (`controlplane-01.patch.yaml`):
 
 ```yaml
 machine:
-    # Static IP Configuration
     network:
         hostname: personal-cp-01
         interfaces:
@@ -160,21 +119,10 @@ machine:
               dhcp: false
 ```
 
-**Create patch files for each worker:**
-
-```sh
-touch worker-01.patch.yaml
-touch worker-02.patch.yaml
-touch worker-03.patch.yaml
-```
-
-**Update the patch files for each worker:**
-
-`worker-01.patch.yaml`:
+**Worker patches** (`worker-01.patch.yaml`, `worker-02.patch.yaml`, `worker-03.patch.yaml`):
 
 ```yaml
 machine:
-    # Static IP Configuration
     network:
         hostname: personal-worker-01
         interfaces:
@@ -185,9 +133,6 @@ machine:
                 - network: 0.0.0.0/0
                   gateway: 192.168.1.254
               dhcp: false
-    # Mounts Required for Longhorn on Worker Nodes
-    # Remove This Section for Control Plane Nodes!
-    # (Leave for Single Node Cluster)
     kubelet:
         extraMounts:
             - destination: /var/lib/longhorn
@@ -199,15 +144,9 @@ machine:
                 - rw
 ```
 
-**Create tailscale.patch.yaml file**
+**Tailscale patch** (`tailscale.patch.yaml`):
 
-This patch is shared across all nodes. It writes a Tailscale auth environment file that the Tailscale system extension reads on boot to register the node with your Tailnet.
-
-```sh
-touch tailscale.patch.yaml
-```
-
-`tailscale.patch.yaml`:
+This patch is shared across all nodes:
 
 ```yaml
 apiVersion: v1alpha1
@@ -217,149 +156,293 @@ environment:
   - TS_AUTHKEY=tskey-auth-your-authkey-here
 ```
 
-Replace `tskey-auth-your-authkey-here` with the auth key you generated earlier.
-
-> **Tip:** If you want each node to have a recognizable hostname in your Tailnet, you can add `TS_EXTRA_ARGS=--advertise-tags=tag:kubernetes --hostname=personal-cp-01` and create per-node Tailscale patches instead. For simplicity, a single shared patch works — Tailscale will use the machine's hostname by default.
+Replace `tskey-auth-your-authkey-here` with the auth key you generated.
 
 ### Apply configuration to nodes
 
-**Now you can apply the configurations to each node**
+When nodes are freshly booted from the Talos ISO (maintenance mode), use `--insecure` since there is no existing trust relationship. No `--endpoints` flag is needed -- the `--nodes` flag tells `talosctl` where to connect directly.
+
+**Control plane:**
 
 ```sh
 talosctl apply-config \
   --nodes $CONTROLPLANE_01_IP \
-  --endpoints $CONTROLPLANE_01_IP \
   --file controlplane.yaml \
   --config-patch @controlplane-01.patch.yaml \
   --config-patch @tailscale.patch.yaml \
   --insecure
+```
 
+**Workers:**
+
+```sh
 talosctl apply-config \
-  --file worker.yaml \
   --nodes $WORKER_01_IP \
-  --endpoints $WORKER_01_IP \
+  --file worker.yaml \
   --config-patch @worker-01.patch.yaml \
   --config-patch @tailscale.patch.yaml \
   --insecure
 
 talosctl apply-config \
-  --file worker.yaml \
   --nodes $WORKER_02_IP \
-  --endpoints $WORKER_02_IP \
+  --file worker.yaml \
   --config-patch @worker-02.patch.yaml \
   --config-patch @tailscale.patch.yaml \
   --insecure
 
 talosctl apply-config \
-  --file worker.yaml \
   --nodes $WORKER_03_IP \
-  --endpoints $WORKER_03_IP \
+  --file worker.yaml \
   --config-patch @worker-03.patch.yaml \
   --config-patch @tailscale.patch.yaml \
   --insecure
 ```
 
-### Bootstrap the cluster
+> **When to use `--insecure`:** Only on first apply to nodes in maintenance mode (fresh boot from ISO). After config is applied and the node reboots, it has a trust relationship with your `talosconfig` and `--insecure` is no longer needed.
+>
+> **When to use `--endpoints`:** Not needed for initial apply. After bootstrapping, `talosctl` uses the endpoints from your `talosconfig`. For worker commands, the endpoint should point to the controlplane (workers proxy through the controlplane API).
 
-After applying the configuration, the nodes will reboot and their IPs and hostnames will change to the static values you defined in the patch files. Update your `.env` file with the new static IPs:
+### Update IPs and bootstrap
 
-```stdout
+After applying config, nodes reboot with their new static IPs. Update `.env`:
+
+```
 CONTROLPLANE_01_IP=192.168.1.140
 WORKER_01_IP=192.168.1.141
 WORKER_02_IP=192.168.1.142
 WORKER_03_IP=192.168.1.143
 ```
 
-Reload your environment:
+Reload environment and update talosconfig endpoint:
 
 ```sh
 direnv reload
+talosctl config endpoint $CONTROLPLANE_01_IP
 ```
 
-**Bootstrap etcd on the first control plane node**
-
-This only needs to be done once, on the first control plane node:
+**Bootstrap etcd** (only once, on the first control plane node):
 
 ```sh
-talosctl bootstrap \
-  --nodes $CONTROLPLANE_01_IP \
-  --endpoints $CONTROLPLANE_01_IP
+talosctl bootstrap --nodes $CONTROLPLANE_01_IP
 ```
 
-**Retrieve the kubeconfig**
+**Retrieve kubeconfig:**
 
 ```sh
-talosctl kubeconfig \
-  --nodes $CONTROLPLANE_01_IP \
-  --endpoints $CONTROLPLANE_01_IP \
-  -f .
+talosctl kubeconfig --nodes $CONTROLPLANE_01_IP -f .
 ```
 
-This writes the `kubeconfig` file to the current directory. Since `KUBECONFIG` is already set to `./kubeconfig`, `kubectl` will pick it up automatically.
-
-**Save secrets.yaml**
-
-```sh
-# Extract secrets from an existing control plane config
-talosctl gen secrets --from-controlplane-config controlplane.yaml
-
-# Encrypt secrets.yaml
-task encrypt:yaml
-```
+This writes `kubeconfig` to the current directory. Since `KUBECONFIG=./kubeconfig`, `kubectl` picks it up automatically.
 
 ### Verify cluster health
 
-**Check that all nodes are ready:**
-
 ```sh
+# Check nodes
 kubectl get nodes -o wide
+
+# Check Talos services
+talosctl health --nodes $CONTROLPLANE_01_IP
+
+# Verify Tailscale is running
+talosctl -n $CONTROLPLANE_01_IP services | grep tailscale
+
+# Check system pods
+kubectl get pods -A
 ```
 
-You should see your control plane and all worker nodes in `Ready` status.
+Nodes should also appear in the [Tailscale admin console](https://login.tailscale.com/admin/machines).
 
-**Check Talos services:**
+### Save secrets and encrypt
 
 ```sh
-talosctl health \
-  --nodes $CONTROLPLANE_01_IP \
-  --endpoints $CONTROLPLANE_01_IP
+# Extract secrets bundle from controlplane config
+talosctl gen secrets --from-controlplane-config controlplane.yaml
+
+# Encrypt all sensitive files
+task encrypt:all
+
+# Commit
+git checkout -b create-cluster
+git add -A
+git commit -m 'feat: add new cluster'
+git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)
 ```
 
-**Verify Tailscale is running on nodes:**
+## Applying configuration changes (existing cluster)
+
+After the cluster is bootstrapped, you no longer need `--insecure`. Use the controlplane as the endpoint for all commands:
+
+```sh
+# Control plane
+talosctl apply-config \
+  --nodes $CONTROLPLANE_01_IP \
+  --file controlplane.yaml \
+  --config-patch @controlplane-01.patch.yaml \
+  --config-patch @tailscale.patch.yaml
+
+# Workers (endpoint is the controlplane)
+talosctl apply-config \
+  --nodes $WORKER_01_IP \
+  --endpoints $CONTROLPLANE_01_IP \
+  --file worker.yaml \
+  --config-patch @worker-01.patch.yaml \
+  --config-patch @tailscale.patch.yaml
+```
+
+## Troubleshooting
+
+### `error constructing client: failed to determine endpoints`
+
+Your `talosconfig` has no endpoints set. Either set them permanently:
+
+```sh
+talosctl config endpoint $CONTROLPLANE_01_IP
+```
+
+Or pass `--endpoints` on each command:
+
+```sh
+talosctl -n $CONTROLPLANE_01_IP --endpoints $CONTROLPLANE_01_IP services
+```
+
+### `tls: certificate signed by unknown authority`
+
+The node's Talos OS CA doesn't match your `talosconfig` client CA. This happens when:
+- You regenerated config files but the node still has the old config
+- The `talosconfig` was generated separately from the `controlplane.yaml`
+
+**Fix:** If the node hasn't been bootstrapped, apply with `--insecure`:
+
+```sh
+talosctl apply-config \
+  --nodes $NODE_IP \
+  --file controlplane.yaml \
+  --config-patch @controlplane-01.patch.yaml \
+  --insecure
+```
+
+**Fix:** If you need to regenerate a matching `talosconfig` from existing config:
+
+```sh
+talosctl gen secrets --from-controlplane-config controlplane.yaml -o secrets.yaml
+talosctl gen config <cluster-name> https://$CONTROLPLANE_01_IP:6443 \
+  --with-secrets secrets.yaml \
+  --output-types talosconfig \
+  --output . \
+  --force
+rm secrets.yaml
+```
+
+### `tls: certificate required`
+
+The node is in maintenance mode and requires a direct insecure connection. Do not use `--endpoints`:
+
+```sh
+talosctl apply-config \
+  --nodes $NODE_IP \
+  --file worker.yaml \
+  --config-patch @worker-01.patch.yaml \
+  --insecure
+```
+
+### Tailscale service not running
+
+Verify the Talos Factory image includes the Tailscale extension:
+
+```sh
+talosctl get extensions -n $CONTROLPLANE_01_IP
+```
+
+If `tailscale` is not listed, the node was installed with a default Talos ISO. You need to either:
+- **Reinstall** with the factory ISO that includes Tailscale
+- **Upgrade** to the factory image:
+  ```sh
+  talosctl upgrade -n $NODE_IP \
+    --image factory.talos.dev/installer/077514df2c1b6436460bc60faabc976687b16193b8a1290fda4366c69024fec2:v1.12.0
+  ```
+
+> **Note:** Talos only supports upgrading one minor version at a time. See [UPGRADE_CLUSTER.md](UPGRADE_CLUSTER.md) for step-by-step instructions.
+
+After the extension is installed, apply the tailscale patch and verify:
 
 ```sh
 talosctl -n $CONTROLPLANE_01_IP services | grep tailscale
 ```
 
-The nodes should also appear in your [Tailscale admin console](https://login.tailscale.com/admin/machines).
+### SOPS MAC mismatch
 
-**Check system pods are running:**
-
-```sh
-kubectl get pods -A
+```
+MAC mismatch. File has <hash>, computed <hash>
 ```
 
-All system pods (coredns, kube-apiserver, kube-scheduler, etc.) should be in `Running` or `Completed` status.
+This happens when an encrypted file was modified outside of SOPS (e.g., manual edit, merge conflict, line ending changes).
 
-### Encrypt and commit files
+**Fix:** Re-encrypt the file with `--ignore-mac`:
 
 ```sh
-git checkout -b create-cluster
-task encrypt:all
-git add -A
-git commit -m 'feat: add new cluster'
-git push --set-upstream origin (git rev-parse --abbrev-ref HEAD)
+sops --ignore-mac --decrypt <file>.enc.yaml > <file>.yaml
+sops --encrypt <file>.yaml > <file>.enc.yaml
+rm <file>.yaml
 ```
 
-## Troubleshooting
+### Environment variables not loading (direnv)
 
-If you need to generate
+If `direnv` doesn't load `.env` automatically, ensure the hook is installed in your shell:
 
 ```sh
-export CLUSTER_NAME=prod-personal-cluster
+# bash
+echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+source ~/.bashrc
 
-# Regenerate just the talosconfig
-talosctl gen config $CLUSTER_NAME https://$CONTROLPLANE_01_IP:6443 \
+# zsh
+echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Then allow the directory:
+
+```sh
+direnv allow
+```
+
+### GPG key not found (SOPS decryption fails)
+
+If SOPS fails with `No secret key` or `no such file or directory`:
+
+```sh
+# Import the GPG keys
+gpg --import ~/.keys/sops/local/lowranceworks/sops-public.asc
+gpg --import ~/.keys/sops/local/lowranceworks/sops-private.asc
+
+# Verify
+gpg --list-secret-keys
+```
+
+### Lost kubeconfig or talosconfig
+
+These files are not stored in git (they're gitignored). If lost:
+
+**talosconfig** -- Regenerate from existing cluster secrets:
+
+```sh
+talosctl gen secrets --from-controlplane-config controlplane.yaml -o secrets.yaml
+talosctl gen config <cluster-name> https://$CONTROLPLANE_01_IP:6443 \
   --with-secrets secrets.yaml \
-  --output-types talosconfig
+  --output-types talosconfig \
+  --output . \
+  --force
+talosctl config endpoint $CONTROLPLANE_01_IP
+rm secrets.yaml
 ```
+
+**kubeconfig** -- Fetch from a running cluster (requires working talosconfig):
+
+```sh
+talosctl kubeconfig --nodes $CONTROLPLANE_01_IP -f .
+```
+
+> **Note:** If connecting over Tailscale, the kubeconfig server address will use the LAN IP. You may need to update it to the Tailscale hostname for remote access:
+> ```sh
+> # Check the Tailscale hostname of the controlplane
+> # Update the server address in kubeconfig to use it
+> ```
