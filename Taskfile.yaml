@@ -187,6 +187,12 @@ tasks:
         echo ""
         echo "All encrypted files validated successfully!"
 
+  hooks:install:
+    desc: Install pre-commit hooks to prevent committing secrets
+    cmds:
+      - pre-commit install
+      - echo "Pre-commit hooks installed successfully."
+
   clean:decrypted:
     desc: Remove all decrypted files across all clusters
     cmds:
