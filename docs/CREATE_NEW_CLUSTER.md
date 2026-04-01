@@ -228,27 +228,35 @@ Replace `tskey-auth-your-authkey-here` with the auth key you generated earlier.
 ```sh
 talosctl apply-config \
   --nodes $CONTROLPLANE_01_IP \
+  --endpoints $CONTROLPLANE_01_IP \
   --file controlplane.yaml \
   --config-patch @controlplane-01.patch.yaml \
-  --config-patch @tailscale.patch.yaml
+  --config-patch @tailscale.patch.yaml \
+  --insecure
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_01_IP \
+  --endpoints $WORKER_01_IP \
   --config-patch @worker-01.patch.yaml \
-  --config-patch @tailscale.patch.yaml
+  --config-patch @tailscale.patch.yaml \
+  --insecure
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_02_IP \
+  --endpoints $WORKER_02_IP \
   --config-patch @worker-02.patch.yaml \
-  --config-patch @tailscale.patch.yaml
+  --config-patch @tailscale.patch.yaml \
+  --insecure
 
 talosctl apply-config \
   --file worker.yaml \
   --nodes $WORKER_03_IP \
+  --endpoints $WORKER_03_IP \
   --config-patch @worker-03.patch.yaml \
-  --config-patch @tailscale.patch.yaml
+  --config-patch @tailscale.patch.yaml \
+  --insecure
 ```
 
 ### Bootstrap the cluster
@@ -288,6 +296,16 @@ talosctl kubeconfig \
 ```
 
 This writes the `kubeconfig` file to the current directory. Since `KUBECONFIG` is already set to `./kubeconfig`, `kubectl` will pick it up automatically.
+
+**Save secrets.yaml**
+
+```sh
+# Extract secrets from an existing control plane config
+talosctl gen secrets --from-controlplane-config controlplane.yaml
+
+# Encrypt secrets.yaml
+task encrypt:yaml
+```
 
 ### Verify cluster health
 
@@ -331,4 +349,17 @@ task encrypt:all
 git add -A
 git commit -m 'feat: add new cluster'
 git push --set-upstream origin (git rev-parse --abbrev-ref HEAD)
+```
+
+## Troubleshooting
+
+If you need to generate
+
+```sh
+export CLUSTER_NAME=prod-personal-cluster
+
+# Regenerate just the talosconfig
+talosctl gen config $CLUSTER_NAME https://$CONTROLPLANE_01_IP:6443 \
+  --with-secrets secrets.yaml \
+  --output-types talosconfig
 ```
