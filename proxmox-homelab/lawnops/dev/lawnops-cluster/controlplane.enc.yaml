@@ -82,7 +82,7 @@ machine:
     #           gateway: 192.168.2.1 # The route's gateway (if empty, creates link scope route).
     #           metric: 1024 # The optional metric for the route.
     #       mtu: 1500 # The interface's MTU.
-    #       
+    #
     #       # # Picks a network device using the selector.
     #       # # select a device with bus prefix 00:*.
     #       # deviceSelector:
@@ -206,12 +206,12 @@ machine:
     #         # The TLS configuration for the registry.
     #         tls:
     #             insecureSkipVerify: true # Skip TLS server certificate verification (not recommended).
-    #             
+    #
     #             # # Enable mutual TLS authentication with the registry.
     #             # clientIdentity:
     #             #     crt: LS0tIEVYQU1QTEUgQ0VSVElGSUNBVEUgLS0t
     #             #     key: LS0tIEVYQU1QTEUgS0VZIC0tLQ==
-    #         
+    #
     #         # # The auth configuration for this registry.
     #         # auth:
     #         #     username: username # Optional registry authentication.
@@ -277,7 +277,7 @@ machine:
         #       # A list of partitions to create on the disk.
         #       partitions:
         #         - mountpoint: /var/mnt/extra # Where to mount the partition.
-        #           
+        #
         #           # # The size of partition: either bytes or human readable representation. If `size:` is omitted, the partition is sized to occupy the full disk.
         #           # # Human readable representation.
         #           # size: 100 MB
@@ -329,11 +329,11 @@ machine:
         #             - # Deterministically generated key from the node UUID and PartitionLabel.
         #               nodeID: {}
         #               slot: 0 # Key slot number for LUKS2 encryption.
-        #               
+        #
         #               # # KMS managed encryption key.
         #               # kms:
         #               #     endpoint: https://192.168.88.21:4443 # KMS endpoint to Seal/Unseal the key.
-        #         
+        #
         #         # # Cipher kind to use for the encryption. Depends on the encryption provider.
         #         # cipher: aes-xts-plain64
         #         # # Defines the encryption sector size.
@@ -416,6 +416,7 @@ cluster:
         # Extra certificate subject alternative names for the API server's certificate.
         certSANs:
             - 192.168.1.220
+            - dev-lawnops-cp-01
         # Disable PodSecurityPolicy in the API server and default manifests.
         disablePodSecurityPolicy: true
         # Configure the API server admission plugins.
@@ -543,8 +544,8 @@ cluster:
 # # Allows running workload on control-plane nodes.
 # allowSchedulingOnControlPlanes: true
 sops:
-    lastmodified: "2026-04-01T04:54:11Z"
-    mac: ENC[AES256_GCM,data:YiIOhbUnqDO8fOnAUP9bWxPYuWSn9YxRDwJ9m7CzKeZYqjXFUkzW9GRZd6uDUVor8DW0BPk3XL7XDQ643YjE+BPJCYR8RmA79xIc4EDcbgrokjZObI6Sbu2QiNWdg8UsDHrLjNhs3hB4bJG2dnIlSTgu2CD2BjQxoqw6zwQTpZg=,iv:JxOEHHGbuP7zhU9HATotjdu5AVA+yUqQpoQqRKY79RU=,tag:IG8Iqlv5x4kK3qQN5oAovg==,type:str]
+    lastmodified: "2026-04-01T06:49:39Z"
+    mac: ENC[AES256_GCM,data:PZiWTQ2UwBmKqA71v6QxFitmufw9VKflMgANnhNlSM3V3C6DyDWvphnARf16lcBMuPzkk0LalOJ0DaEvxDtJ8WLV580PaYuEXuLf6/KNfIHZ4ZgCXpEUTWmUdmwVp6cD9I+TpQc8xL0ykiU2QznUmedfu4FctN8cL47pUDWV8Eg=,iv:fF57Q+QlcyiG9iiZd0TzuMkqb1Czn+KJlvNQM7xlJGA=,tag:Caz46oXYXfPi7kQuQrLPng==,type:str]
     pgp:
         - created_at: "2026-04-01T04:54:11Z"
           enc: |-

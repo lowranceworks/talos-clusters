@@ -79,7 +79,7 @@ machine:
     #           gateway: 192.168.2.1 # The route's gateway (if empty, creates link scope route).
     #           metric: 1024 # The optional metric for the route.
     #       mtu: 1500 # The interface's MTU.
-    #       
+    #
     #       # # Picks a network device using the selector.
     #       # # select a device with bus prefix 00:*.
     #       # deviceSelector:
@@ -203,12 +203,12 @@ machine:
     #         # The TLS configuration for the registry.
     #         tls:
     #             insecureSkipVerify: true # Skip TLS server certificate verification (not recommended).
-    #             
+    #
     #             # # Enable mutual TLS authentication with the registry.
     #             # clientIdentity:
     #             #     crt: LS0tIEVYQU1QTEUgQ0VSVElGSUNBVEUgLS0t
     #             #     key: LS0tIEVYQU1QTEUgS0VZIC0tLQ==
-    #         
+    #
     #         # # The auth configuration for this registry.
     #         # auth:
     #         #     username: username # Optional registry authentication.
@@ -274,7 +274,7 @@ machine:
         #       # A list of partitions to create on the disk.
         #       partitions:
         #         - mountpoint: /var/mnt/extra # Where to mount the partition.
-        #           
+        #
         #           # # The size of partition: either bytes or human readable representation. If `size:` is omitted, the partition is sized to occupy the full disk.
         #           # # Human readable representation.
         #           # size: 100 MB
@@ -326,11 +326,11 @@ machine:
         #             - # Deterministically generated key from the node UUID and PartitionLabel.
         #               nodeID: {}
         #               slot: 0 # Key slot number for LUKS2 encryption.
-        #               
+        #
         #               # # KMS managed encryption key.
         #               # kms:
         #               #     endpoint: https://192.168.88.21:4443 # KMS endpoint to Seal/Unseal the key.
-        #         
+        #
         #         # # Cipher kind to use for the encryption. Depends on the encryption provider.
         #         # cipher: aes-xts-plain64
         #         # # Defines the encryption sector size.
@@ -403,7 +403,7 @@ cluster:
     #           gateway: 192.168.2.1 # The route's gateway (if empty, creates link scope route).
     #           metric: 1024 # The optional metric for the route.
     #       mtu: 1500 # The interface's MTU.
-    #       
+    #
     #       # # Picks a network device using the selector.
     #       # # select a device with bus prefix 00:*.
     #       # deviceSelector:
@@ -515,6 +515,7 @@ cluster:
         # Extra certificate subject alternative names for the API server's certificate.
         certSANs:
             - 192.168.1.150
+            - prod-platform-cp-01
         # Disable PodSecurityPolicy in the API server and default manifests.
         disablePodSecurityPolicy: true
         # Configure the API server admission plugins.
@@ -642,8 +643,8 @@ cluster:
 # # Allows running workload on control-plane nodes.
 # allowSchedulingOnControlPlanes: true
 sops:
-    lastmodified: "2026-04-01T04:54:11Z"
-    mac: ENC[AES256_GCM,data:4ZJYtqKiPt3CC9oScNHNMp8JqCBcdJioiMp2Mbnd8Awhio4iZSb9avwxFEQd+NtUB0n3AuU32WRP25XaqV7PKCeGTqZoWjfJxdIVmwix3u0v7BiTCS9pne6UiBvPFdEJaLbeyP8YxUxlqztQtY0yJ3K4H2si2oZriuAlTqO7E2s=,iv:4KfN284ZijQC3RFd5wol10xHMw71oVItPjf0pziTmwI=,tag:Ne+dbe0R9vTyQtbFLTbz3g==,type:str]
+    lastmodified: "2026-04-01T06:49:17Z"
+    mac: ENC[AES256_GCM,data:ofgxIqU9f8R0dlcW/mtBcJCPzemzqhBEYuLH249DMfNfc6WVGkgz3L3DL8O7yY6vbrgzvtOuFAxVrzVnpYhb6+jrFczsTVI/TxzgBTMOQSxWPbmQ9dWW23qq1kucD0RLQoc6+fcAhKbinkzhSGUjK+MsCWFy7PtZsgyo1Ao+18I=,iv:B2RRUjYs/wF5YjJcAQL0NM5OfTsEd9x+TLE4+qlf3WY=,tag:tYvLX28jPf63OfSJjfe+lA==,type:str]
     pgp:
         - created_at: "2026-04-01T04:54:11Z"
           enc: |-
