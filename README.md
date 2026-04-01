@@ -8,15 +8,11 @@ Encrypted Talos Kubernetes cluster configurations managed with [SOPS](https://gi
 proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
 ```
 
-**Example:**
-- `proxmox-homelab/lowranceworks/prod/personal-cluster/`
-- `proxmox-homelab/lawnops/prod/platform-cluster/`
-- `proxmox-homelab/lawnops/dev/lawnops-cluster/`
-
-**Full directory tree:**
-
 ```
 .
+├── .gitignore
+├── .sops.yaml
+├── README.md
 ├── Taskfile.yaml
 ├── docs/
 │   ├── CREATE_NEW_CLUSTER.md
@@ -25,38 +21,44 @@ proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/
     ├── lawnops/
     │   ├── dev/
     │   │   └── lawnops-cluster/
-    │   │       ├── .env
-    │   │       ├── .envrc
-    │   │       ├── controlplane-01.patch.yaml
-    │   │       ├── worker-01.patch.yaml
-    │   │       ├── worker-02.patch.yaml
-    │   │       └── worker-03.patch.yaml
     │   └── prod/
     │       └── platform-cluster/
-    │           ├── .env
-    │           ├── .envrc
-    │           ├── controlplane-01.patch.yaml
-    │           ├── worker-01.patch.yaml
-    │           ├── worker-02.patch.yaml
-    │           └── worker-03.patch.yaml
     └── lowranceworks/
         └── prod/
             └── personal-cluster/
-                ├── .env
-                ├── .envrc
-                ├── controlplane-01.patch.yaml
-                ├── worker-01.patch.yaml
-                ├── worker-02.patch.yaml
-                └── worker-03.patch.yaml
 ```
 
-> Encrypted files (`controlplane.yaml`, `worker.yaml`, `secrets.yaml`) are gitignored and only committed in their encrypted form (`.enc.yaml`). They will appear in the cluster directories after running `task decrypt:all`.
+**Directory path convention:** `proxmox-homelab/{org}/{lifecycle}/{purpose}-cluster/`
 
-**Directory components:**
-- `proxmox-homelab` - Infrastructure provider / homelab root
-- `org` - Github Organization (lowranceworks, lawnops)
-- `lifecycle` - Environment (prod, dev, staging)
-- `purpose` - Cluster name/purpose
+- `proxmox-homelab` -- Infrastructure provider / homelab root
+- `org` -- GitHub organization (`lowranceworks`, `lawnops`)
+- `lifecycle` -- Environment (`prod`, `dev`, `staging`)
+- `purpose` -- Cluster name/purpose
+
+### Cluster directory files
+
+Each cluster directory contains the following files:
+
+| File | Committed | Description |
+|------|-----------|-------------|
+| `.env` | Yes | Environment variables (node IPs, config paths) |
+| `.envrc` | Yes | Loads `.env` via direnv |
+| `controlplane-*.patch.yaml` | Yes | Control plane node patches (hostname, static IP) |
+| `worker-*.patch.yaml` | Yes | Worker node patches (hostname, static IP, mounts) |
+| `controlplane.enc.yaml` | Yes | Encrypted control plane machine config |
+| `worker.enc.yaml` | Yes | Encrypted worker machine config |
+| `secrets.enc.yaml` | Yes | Encrypted cluster secrets bundle |
+| `tailscale.patch.enc.yaml` | Yes | Encrypted Tailscale auth key patch |
+| `kubeconfig.enc` | Yes | Encrypted Kubernetes client config |
+| `talosconfig.enc` | Yes | Encrypted Talos client config |
+| `controlplane.yaml` | No | Decrypted control plane config (gitignored) |
+| `worker.yaml` | No | Decrypted worker config (gitignored) |
+| `secrets.yaml` | No | Decrypted secrets bundle (gitignored) |
+| `tailscale.patch.yaml` | No | Decrypted Tailscale patch (gitignored) |
+| `kubeconfig` | No | Decrypted Kubernetes client config (gitignored) |
+| `talosconfig` | No | Decrypted Talos client config (gitignored) |
+
+> Decrypted files appear locally after running `task decrypt:all` and are removed when running `task encrypt:all`.
 
 ## Quick Start
 
@@ -130,16 +132,13 @@ talosctl apply-config \
 | `task validate` | Verify all encrypted files can be decrypted |
 | `task clean:decrypted` | Remove all decrypted files across all clusters |
 
-## File Naming
-
-- **Decrypted (local only)**: `controlplane.yaml`, `worker.yaml`, `secrets.yaml`
-- **Encrypted (committed)**: `controlplane.enc.yaml`, `worker.enc.yaml`, `secrets.enc.yaml`
-- **Always committed**: `.env`, `.envrc`, `controlplane-*.patch.yaml`, `worker-*.patch.yaml`
-
 ## Security
 
-✅ **Committed:** `*.enc.yaml`, `*.enc` (encrypted files only)  
-❌ **Ignored:** Decrypted files (via `.gitignore`)
+Sensitive values are encrypted with [SOPS](https://github.com/getsops/sops) using GPG. Only specific YAML keys are encrypted (selective encryption), so non-sensitive fields like hostnames, cluster names, and API server addresses remain readable in the encrypted files.
+
+- `*.enc.yaml` -- YAML files with selective key encryption
+- `*.enc` -- Config files (`kubeconfig`, `talosconfig`) with selective key encryption
+- Decrypted plaintext files are gitignored and never committed
 
 ## Resources
 
