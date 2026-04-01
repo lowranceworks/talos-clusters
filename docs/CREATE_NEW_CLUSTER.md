@@ -220,19 +220,28 @@ direnv reload
 talosctl config endpoint $CONTROLPLANE_01_IP
 ```
 
-**Bootstrap etcd** (only once, on the first control plane node):
+**Wait for the controlplane to be ready**, then **bootstrap etcd** (only once, on a single control plane node):
 
 ```sh
-talosctl bootstrap --nodes $CONTROLPLANE_01_IP
+talosctl bootstrap \
+  --nodes $CONTROLPLANE_01_IP \
+  --endpoints $CONTROLPLANE_01_IP
 ```
+
+> **Note:** The `--endpoints` flag is required here because the talosconfig endpoint may not resolve correctly until the cluster is fully up. This command must only be run **once** on a **single** control plane node. Running it again will fail.
 
 **Retrieve kubeconfig:**
 
 ```sh
-talosctl kubeconfig --nodes $CONTROLPLANE_01_IP -f .
+talosctl kubeconfig \
+  --nodes $CONTROLPLANE_01_IP \
+  --endpoints $CONTROLPLANE_01_IP \
+  -f .
 ```
 
 This writes `kubeconfig` to the current directory. Since `KUBECONFIG=./kubeconfig`, `kubectl` picks it up automatically.
+
+> **Note:** After bootstrap and kubeconfig retrieval succeed, the `--endpoints` flag is no longer needed for subsequent commands as long as your talosconfig has the endpoint set via `talosctl config endpoint`.
 
 ### Verify cluster health
 
@@ -315,7 +324,7 @@ The node's Talos OS CA doesn't match your `talosconfig` client CA. This happens 
 
 ```sh
 talosctl apply-config \
-  --nodes $NODE_IP \
+  --nodes $CONTROLPLANE_01_IP \
   --file controlplane.yaml \
   --config-patch @controlplane-01.patch.yaml \
   --insecure
