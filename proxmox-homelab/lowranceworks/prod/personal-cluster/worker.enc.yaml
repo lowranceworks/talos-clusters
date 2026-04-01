@@ -390,7 +390,7 @@ cluster:
     # Provides control plane specific configuration options.
     controlPlane:
         # Endpoint is the canonical controlplane endpoint, which can be an IP address or a DNS hostname.
-        endpoint: https://192.168.1.117:6443
+        endpoint: https://192.168.1.230:6443
     # Configures the cluster's name.
     clusterName: prod-personal-cluster
     # Provides cluster specific network configuration options.
@@ -570,8 +570,8 @@ cluster:
 # # Allows running workload on control-plane nodes.
 # allowSchedulingOnControlPlanes: true
 sops:
-    lastmodified: "2026-03-31T22:14:34Z"
-    mac: ENC[AES256_GCM,data:duHYAPo5TomljJA/WeoHgcLLcInaD/ESOYlQBu2s10pkN1At57j+Qz2wNzKwtGi4H2IGvem0YXctjR5j1VdPE+L6Ohxm1+rR+y9UrDu16SivullDGyAchdyRYIRfdm1Pjd1XLbn5CkJ9tkDWNn4cl4imxQ4cW5hQ2+claa2JV6E=,iv:3BdIDYoOlD6iGVw78kUhKxiyQ+t4O44Xx+VsU7ngOpY=,tag:VNLCvUMT4V209xB2N5ho6w==,type:str]
+    lastmodified: "2026-04-01T02:59:53Z"
+    mac: ENC[AES256_GCM,data:lgiUnTcwiuJcG8MbTVEwSLoRLYyR8s6U00l3z1AWnPMEIcLv1DyefMToGU8k6ewVVPM+UssIz5UPJDqyxmkB9+ZqnOPQ6X3NsT07WIlKCCXpRgDdGv6M5vSs0rTyu1ZLzOt10lItKXoLn3eU7/F3N31ny5Qps8AO4att8JvNUd8=,iv:CZC9FCtLonkC7j7bCLZYSIt4qmA98ifg+yD47FdpHxM=,tag:x3wErxLN9vzPs+6yzQ2hsQ==,type:str]
     pgp:
         - created_at: "2026-03-31T22:14:34Z"
           enc: |-
