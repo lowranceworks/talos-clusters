@@ -1,7 +1,7 @@
 # Ignore files with sensitive values
 controlplane.yaml
 worker.yaml
-*secret*
+secrets.yaml
 kubeconfig
 talosconfig
 tailscale.patch.yaml
