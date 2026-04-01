@@ -6,7 +6,7 @@ creation_rules:
 
   # All YAML files - encrypt sensitive keys
   - path_regex: .*\.yaml$
-    encrypted_regex: "^(ca|crt|id|secret|secretboxEncryptionSecret|token|bootstraptoken|key|environment|TS_AUTHKEY)$"
+    encrypted_regex: "^(ca|crt|id|secret|secretboxEncryptionSecret|secretboxencryptionsecret|token|bootstraptoken|key|environment|TS_AUTHKEY)$"
     pgp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
 
   # Fallback for any other files
