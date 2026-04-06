@@ -2,36 +2,47 @@
 
 ## Prerequisites
 
-- [Proxmox](https://www.proxmox.com/) VMs provisioned with the Talos Factory ISO
-- [talosctl](https://www.talos.dev/) installed
-- [direnv](https://direnv.net/) installed and hooked into your shell
-- [Task](https://taskfile.dev/) installed
-- [SOPS](https://github.com/getsops/sops) installed with GPG key imported
-- A [Tailscale](https://tailscale.com) account and auth key
+See [prerequisites](https://github.com/lowranceworks/talos-clusters?tab=readme-ov-file#prerequisites) in the README.
+
+You will also need:
+
+- [Proxmox](https://www.proxmox.com/) VMs provisioned with the Talos Factory ISO (see below)
+- A [Tailscale](https://tailscale.com) account and auth key (see below)
 
 ### Talos Factory Image
 
-Use a Talos Factory image that includes system extensions. Download the ISO from:
+We use a [Talos Factory](https://factory.talos.dev/) image that bundles the following system extensions:
+
+- `iscsi-tools`
+- `qemu-guest-agent`
+- `tailscale`
+- `util-linux-tools`
+
+Browse and customize the image:
 
 ```
 https://factory.talos.dev/?arch=amd64&extensions=siderolabs%2Ftailscale&version=1.12.0
 ```
 
-Direct ISO download:
+Direct ISO download (the hash identifies the extension set; the version segment selects the Talos release):
 
 ```
 https://factory.talos.dev/image/077514df2c1b6436460bc60faabc976687b16193b8a1290fda4366c69024fec2/v1.12.0/nocloud-amd64.iso
 ```
 
-This image includes: iscsi-tools, qemu-guest-agent, tailscale, util-linux-tools.
-
-> **Important:** You must use a factory image that includes the Tailscale extension. If you use the default Talos ISO, the Tailscale service will not be available even if you apply the tailscale patch.
+> **Important:** You must use a factory image that includes the Tailscale extension. If you boot from the default Talos ISO, the Tailscale service will not be available even after applying the tailscale patch — you would need to upgrade to the factory image first. See [UPGRADE_CLUSTER.md](UPGRADE_CLUSTER.md).
 
 ### Tailscale Auth Key
 
-Create an auth key from the [Tailscale admin console](https://login.tailscale.com/admin/settings/keys). The key is used to register nodes with your Tailnet.
+Create an auth key from the [Tailscale admin console](https://login.tailscale.com/admin/settings/keys). The key is used to register nodes with your Tailnet on first boot.
 
-> **Note:** Auth keys expire after a maximum of 90 days. This does not remove existing nodes from the Tailnet -- it only means the key can no longer register new nodes.
+Recommended settings when generating the key:
+
+- **Reusable** -- so the same key works for all nodes in the cluster
+- **Ephemeral: off** -- so nodes persist in your Tailnet across reboots
+- **Tags** -- e.g. `tag:k8s` for ACL targeting
+
+> **Note:** Auth keys expire after a maximum of 90 days. Expiration only affects the ability to register *new* nodes — it does not remove existing nodes from the Tailnet. If you also disable key expiry on the registered nodes themselves (in the admin console), they will continue to work indefinitely even if the auth key in your patch file expires.
 
 ## Create Virtual Servers
 
@@ -204,7 +215,7 @@ talosctl apply-config \
 
 ### Update IPs and bootstrap
 
-After applying config, nodes reboot with their new static IPs. Update `.env`:
+After applying config, each node reboots with its new static IP. Update `.env` with the static IPs you defined in the patch files:
 
 ```
 CONTROLPLANE_01_IP=192.168.1.140
@@ -213,14 +224,14 @@ WORKER_02_IP=192.168.1.142
 WORKER_03_IP=192.168.1.143
 ```
 
-Reload environment and update talosconfig endpoint:
+Reload environment and update the talosconfig endpoint to point at the new control plane IP:
 
 ```sh
 direnv reload
 talosctl config endpoint $CONTROLPLANE_01_IP
 ```
 
-**Wait for the controlplane to be ready**, then **bootstrap etcd** (only once, on a single control plane node):
+**Wait for the control plane to come back up** (you can poll with `talosctl -n $CONTROLPLANE_01_IP version`), then **bootstrap etcd**:
 
 ```sh
 talosctl bootstrap \
@@ -228,7 +239,7 @@ talosctl bootstrap \
   --endpoints $CONTROLPLANE_01_IP
 ```
 
-> **Note:** The `--endpoints` flag is required here because the talosconfig endpoint may not resolve correctly until the cluster is fully up. This command must only be run **once** on a **single** control plane node. Running it again will fail.
+> **Important:** `talosctl bootstrap` initializes the etcd cluster. It must be run **exactly once** against a **single** control plane node. Running it again — or against multiple nodes — will fail or corrupt the cluster. The `--endpoints` flag is passed explicitly here to avoid any ambiguity during the bootstrap window.
 
 **Retrieve kubeconfig:**
 
@@ -263,14 +274,30 @@ Nodes should also appear in the [Tailscale admin console](https://login.tailscal
 
 ### Save secrets and encrypt
 
+Extract the cluster secrets bundle so it can be encrypted and committed alongside the rest of the config:
+
 ```sh
-# Extract secrets bundle from controlplane config
 talosctl gen secrets --from-controlplane-config controlplane.yaml
+```
 
-# Encrypt all sensitive files
+This creates `secrets.yaml` (gitignored). Now encrypt everything sensitive:
+
+```sh
 task encrypt:all
+```
 
-# Commit
+This produces the following encrypted files (which **are** committed):
+
+- `controlplane.enc.yaml`
+- `worker.enc.yaml`
+- `secrets.enc.yaml`
+- `tailscale.patch.enc.yaml`
+- `kubeconfig.enc.yaml`
+- `talosconfig.enc.yaml`
+
+Commit and push:
+
+```sh
 git checkout -b create-cluster
 git add -A
 git commit -m 'feat: add new cluster'
@@ -279,7 +306,7 @@ git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)
 
 ## Applying configuration changes (existing cluster)
 
-After the cluster is bootstrapped, you no longer need `--insecure`. Use the controlplane as the endpoint for all commands:
+After the cluster is bootstrapped, you no longer need `--insecure`. Assuming `talosctl config endpoint` is set to the control plane, you can omit `--endpoints` from individual commands.
 
 ```sh
 # Control plane
@@ -289,14 +316,25 @@ talosctl apply-config \
   --config-patch @controlplane-01.patch.yaml \
   --config-patch @tailscale.patch.yaml
 
-# Workers (endpoint is the controlplane)
+# Workers (proxied through the control plane endpoint set in talosconfig)
 talosctl apply-config \
   --nodes $WORKER_01_IP \
-  --endpoints $CONTROLPLANE_01_IP \
   --file worker.yaml \
   --config-patch @worker-01.patch.yaml \
   --config-patch @tailscale.patch.yaml
 ```
+
+> **Critical:** Always include `@tailscale.patch.yaml` when re-applying configs to nodes you reach over Tailscale. Omitting it will cause the node to reboot **without** the Tailscale extension running, and you will lose remote access. See [Re-applying config to a remote (Tailscale-only) node](#re-applying-config-to-a-remote-tailscale-only-node) below.
+
+### Re-applying config to a remote (Tailscale-only) node
+
+When the only path to a node is its Tailscale IP (e.g. you're off the LAN), the safety rules are:
+
+1. **The Tailscale extension must remain installed.** Always pass `--config-patch @tailscale.patch.yaml`.
+2. **The auth key in the patch may be expired** — that's OK *as long as* the node is already registered in your Tailnet with key expiry disabled. Tailscale uses the cached node identity on reboot rather than re-running the auth key flow.
+3. **If the node is not yet in your Tailnet** (or has expired and been removed), you must update the patch with a fresh auth key before applying. Otherwise the node will boot without Tailscale and you'll be locked out.
+
+Verify the auth key state in the [Tailscale admin console](https://login.tailscale.com/admin/machines) before applying.
 
 ## Troubleshooting
 
@@ -353,6 +391,28 @@ talosctl apply-config \
   --config-patch @worker-01.patch.yaml \
   --insecure
 ```
+
+### Locked out of a node after applying config
+
+If you re-applied config to a remote node and lost connectivity, the most common causes are:
+
+- You forgot `--config-patch @tailscale.patch.yaml`, so the node rebooted without the Tailscale extension.
+- You applied a `tailscale.patch.yaml` containing an expired auth key to a node that wasn't yet registered in your Tailnet.
+- The static IP in the patch file is wrong for the node's network.
+
+Recovery requires LAN/console access to the node:
+
+```sh
+# From a host on the same LAN
+talosctl apply-config \
+  --nodes <node-lan-ip> \
+  --file worker.yaml \
+  --config-patch @worker-XX.patch.yaml \
+  --config-patch @tailscale.patch.yaml \
+  --insecure  # only if the node fell back to maintenance mode
+```
+
+See [Re-applying config to a remote (Tailscale-only) node](#re-applying-config-to-a-remote-tailscale-only-node) for prevention.
 
 ### Tailscale service not running
 
@@ -450,8 +510,4 @@ rm secrets.yaml
 talosctl kubeconfig --nodes $CONTROLPLANE_01_IP -f .
 ```
 
-> **Note:** If connecting over Tailscale, the kubeconfig server address will use the LAN IP. You may need to update it to the Tailscale hostname for remote access:
-> ```sh
-> # Check the Tailscale hostname of the controlplane
-> # Update the server address in kubeconfig to use it
-> ```
+> **Note:** If connecting over Tailscale, the fetched kubeconfig will contain the control plane's LAN IP as the API server address. To use it remotely, edit the `server:` field in `kubeconfig` to point at the control plane's Tailscale hostname (e.g. `https://prod-platform-cp-01:6443`) or its Tailscale IP. You will also need to add the Tailscale hostname/IP to the API server's `certSANs` in `controlplane.yaml` (and re-apply) so the TLS certificate is valid for that name.
