@@ -51,12 +51,12 @@ Each cluster directory contains the following files:
 | `tailscale.patch.enc.yaml` | Yes | Encrypted Tailscale auth key patch |
 | `kubeconfig.enc` | Yes | Encrypted Kubernetes client config |
 | `talosconfig.enc` | Yes | Encrypted Talos client config |
-| `controlplane.yaml` | No | Decrypted control plane config (gitignored) |
-| `worker.yaml` | No | Decrypted worker config (gitignored) |
-| `secrets.yaml` | No | Decrypted secrets bundle (gitignored) |
-| `tailscale.patch.yaml` | No | Decrypted Tailscale patch (gitignored) |
-| `kubeconfig` | No | Decrypted Kubernetes client config (gitignored) |
-| `talosconfig` | No | Decrypted Talos client config (gitignored) |
+| `controlplane.yaml` | No | Decrypted control plane config |
+| `worker.yaml` | No | Decrypted worker config |
+| `secrets.yaml` | No | Decrypted secrets bundle |
+| `tailscale.patch.yaml` | No | Decrypted Tailscale patch |
+| `kubeconfig` | No | Decrypted Kubernetes client config |
+| `talosconfig` | No | Decrypted Talos client config |
 
 > Decrypted files appear locally after running `task decrypt:all` and are removed when running `task encrypt:all`.
 
@@ -64,9 +64,11 @@ Each cluster directory contains the following files:
 
 ### Prerequisites
 
+- VMs or bare-metal hosts to run Talos on (we use [Proxmox](https://www.proxmox.com/), but any hypervisor or hardware works)
 - [Task](https://taskfile.dev/)
 - [SOPS](https://github.com/getsops/sops)
 - [talosctl](https://www.talos.dev/)
+- [direnv](https://direnv.net/)
 - GPG key at `~/.keys/sops/local` (fingerprint: `46A08BAEF7DB948F66897A69C6D12C69DB830D3B`)
 
 To import the key on a new machine:
@@ -138,7 +140,7 @@ Sensitive values are encrypted with [SOPS](https://github.com/getsops/sops) usin
 
 - `*.enc.yaml` -- YAML files with selective key encryption
 - `*.enc` -- Config files (`kubeconfig`, `talosconfig`) with selective key encryption
-- Decrypted plaintext files are gitignored and never committed
+- Decrypted plaintext files are and never committed
 
 ## Resources
 

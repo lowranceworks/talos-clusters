@@ -1,28 +1,33 @@
-# Talos Cluster Upgrade Guide
+# Upgrade Cluster
 
-This guide covers upgrading the Talos cluster from v1.9.5 to v1.12.0 with factory image extensions.
+This guide covers upgrading a Talos cluster from `v1.9.5` to `v1.12.0` using a factory image with extensions.
 
 ## Overview
 
-Talos requires upgrading one minor version at a time. Our upgrade path:
-- v1.9.5 → v1.10.6 → v1.11.3 → v1.12.0
+Talos requires upgrading one minor version at a time. The upgrade path is:
+
+`v1.9.5` → `v1.10.6` → `v1.11.3` → `v1.12.0`
+
+Always upgrade control plane nodes before workers, and wait for each phase to complete before proceeding to the next.
 
 ## Prerequisites
 
-- Use [direnv]() and `.env` to set environment variables for node IPs:
-```bash
-  CONTROLPLANE_01_IP=192.168.1.150
-  WORKER_01_IP=192.168.1.151
-  WORKER_02_IP=192.168.1.152
-  WORKER_03_IP=192.168.1.153
-```
+See [prerequisites](https://github.com/lowranceworks/talos-clusters?tab=readme-ov-file#prerequisites) in the README.
 
-- Factory image with extensions:
+## Factory Image
+
+We use a [Talos Factory](https://factory.talos.dev/) image that bundles the following system extensions:
+
+- `iscsi-tools`
+- `qemu-guest-agent`
+- `tailscale`
+- `util-linux-tools`
+
+Image reference (the tag determines the Talos version):
+
 ```
-  factory.talos.dev/installer/077514df2c1b6436460bc60faabc976687b16193b8a1290fda4366c69024fec2
+factory.talos.dev/installer/077514df2c1b6436460bc60faabc976687b16193b8a1290fda4366c69024fec2:<version>
 ```
-  
-  Includes: iscsi-tools, qemu-guest-agent, tailscale, util-linux-tools
 
 ## Upgrade Process
 
@@ -111,20 +116,20 @@ kubectl get pods -A
 
 ## Notes
 
-- Always upgrade control planes before workers
-- Wait for each upgrade phase to complete before proceeding
-- Workers can be upgraded simultaneously
-- Workload disruption is expected during worker upgrades as pods are rescheduled
-- The `install.image` in machine configs has been updated to use the factory image for future operations
+- Workers can be upgraded in parallel within the same minor version step.
+- Workload disruption is expected during worker upgrades as pods are rescheduled.
+- The `install.image` in machine configs should reference the factory image so future `apply-config` operations preserve extensions.
 
 ## Troubleshooting
 
-If an upgrade fails:
+Check kernel logs on a node:
+
 ```bash
 talosctl logs -n <node-ip> -k
 ```
 
-To check upgrade status:
+Check the boot/upgrade messages:
+
 ```bash
 talosctl dmesg -n <node-ip>
 ```
