@@ -67,6 +67,7 @@ Each cluster directory contains the following files:
 - [Task](https://taskfile.dev/)
 - [SOPS](https://github.com/getsops/sops)
 - [talosctl](https://www.talos.dev/)
+- [direnv](https://direnv.net/)
 - GPG key at `~/.keys/sops/local` (fingerprint: `46A08BAEF7DB948F66897A69C6D12C69DB830D3B`)
 
 To import the key on a new machine:
