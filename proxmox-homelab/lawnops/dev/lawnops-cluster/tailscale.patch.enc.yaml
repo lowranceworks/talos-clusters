@@ -2,22 +2,22 @@ apiVersion: v1alpha1
 kind: ExtensionServiceConfig
 name: tailscale
 environment:
-    - ENC[AES256_GCM,data:tZw8+h382ao3uOi0JtvM1Sb+vBbZdyUl+IRJtEI15MVbmYcuNW1JZzkoCIMZdTXmBa3R0fZ5IGJ/XpqHtNo4WPRyJvLw0JFH,iv:NqScTuiqAGQpHEZR/ajQbgQByM7+umqwWYsZzfBBgPk=,tag:crHt+5gx97oMwf5nEr3MOQ==,type:str]
-    - ENC[AES256_GCM,data:UL7oLMgDhHU/Iey6G00SxTHkaRWPGVdR3cLfAMjeWg==,iv:p1JQpr+GW778wPm/t+G6mD9WbZvvnYoFTOxPXTqghbU=,tag:XkNL4tfmeYV8AIK9iKQXNA==,type:str]
+    - ENC[AES256_GCM,data:0oJ1TooZ8zMxy11D+McF5otlGEuTAaS8/ki/zJzc0IZzTTQiYFHXzL/wk8phUElMn8f3A1oDTlcTQVUY9+AWA/B5Ex8CmpmI,iv:RVVn+4mfrgKZJHVeSBhxkDEGeOawFpac6Evkuk9slKQ=,tag:OJ1OXzuTd0wqOa969TQkNA==,type:str]
+    - ENC[AES256_GCM,data:OYNQN6eV677o3lBZGizphGHxLiMJMpNRH+kq4K9edQ==,iv:5B4Tyfj3CBFXiJq25/eYGYgpSilutnvsB03ayXKB9To=,tag:keQj6n0G8d7fKdq/H56jyw==,type:str]
 sops:
-    lastmodified: "2026-04-12T02:10:17Z"
-    mac: ENC[AES256_GCM,data:1o+xylJffT8uc0FXaby9HexgLCAnXNS/PFOZ7YFBdEd9tDscSrF3M4ikr+KtNKhI8IqCyKEHp49DH6K7AJ7jj4osN0X+l4V7t3KcfIzUsjO4HGx/MTJqkbeV8QaWrcYqq9aYzpVaYrRwgMvYyK/FRH1Kpqp4UkwpaYQghFi7/CI=,iv:1sMclAI4ApbutalB9M8Uccl+4/Ndzh8nvlK6doISaMY=,tag:0bIQ/BPPrxIEJvby2Vh+xQ==,type:str]
+    lastmodified: "2026-04-28T15:09:58Z"
+    mac: ENC[AES256_GCM,data:CTHkSskZLjeotFI7AaHgZBO/GBWmlwmw8P55JxwFB9bndKxXqBXjM+1ov6kBo69+FkwwW0y4VVeXGEJCKJiLIFLxW4zn5za8BD5/XUFLFXq2wueFp9KHbNStLYhQPnPWuH0VY4A1g7kfQoZHb7xoD/D7Hq179UtUIhvJ9RyU3Qc=,iv:QaruhGfSgGEJvWtnxSCwO7QulWidwsn9BVCz0eRCBrw=,tag:vy5BQHnoqkZwsPhy8aiC2w==,type:str]
     pgp:
-        - created_at: "2026-04-12T02:10:17Z"
+        - created_at: "2026-04-28T15:09:58Z"
           enc: |-
             -----BEGIN PGP MESSAGE-----
 
-            hF4DcDhmFWror8ASAQdAVZROgFBmH3TXMHXxbWAsfykwcUptCJF8jZYpV1E2aWgw
-            nEeXdwlEMjkhbIW0GyP407BYdND+HtLWmBFSxwfskOr9MrjeytpJuCw7ZYQWpYQy
-            1GgBCQIQk0cPTuurdx0UJ3zXClkTvTBtEQoWR4SukekBxqBdTHkrd9oadN1zeVyj
-            ItAEqrZsIR8sXA8+uRe2R6f2XpbiQzcd+uJ8JBqHVKoaiearHpvtUnDGw7fUzIbw
-            HhLJaprOTRjE/w==
-            =7JKG
+            hF4DcDhmFWror8ASAQdA6LX9k043fgf8nI5yR86HwkB/1n+aNkeblrrymhdF4Ssw
+            061icagUwdjrVQONEaSHazT/GgIM1snEho2RuLvmzK6MglUTMCvUFmOfpJSE6z7o
+            1GgBCQIQ8BKxYzP3yh71TzMhlFwYxJM4H0lEE5qZ6wt+cgdV0w2ORTotjbBgWoJz
+            0UQwiHgqRQpRGZ6kv5PqReOzjqNjNarm35P2vTx7yxZ2gEY5T/0F03g6R5LfX6Of
+            pP9RybcVTCqVaA==
+            =hfqj
             -----END PGP MESSAGE-----
           fp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
     encrypted_regex: ^(ca|crt|id|secret|secretboxEncryptionSecret|secretboxencryptionsecret|token|bootstraptoken|key|environment|TS_AUTHKEY)$
