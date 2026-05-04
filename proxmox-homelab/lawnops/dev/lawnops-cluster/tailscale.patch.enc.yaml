@@ -2,11 +2,11 @@ apiVersion: v1alpha1
 kind: ExtensionServiceConfig
 name: tailscale
 environment:
-    - ENC[AES256_GCM,data:0oJ1TooZ8zMxy11D+McF5otlGEuTAaS8/ki/zJzc0IZzTTQiYFHXzL/wk8phUElMn8f3A1oDTlcTQVUY9+AWA/B5Ex8CmpmI,iv:RVVn+4mfrgKZJHVeSBhxkDEGeOawFpac6Evkuk9slKQ=,tag:OJ1OXzuTd0wqOa969TQkNA==,type:str]
+    - ENC[AES256_GCM,data:6/zGSobXfEQFhDEH6iqyJtLJBlGzINQoz92K9L3lY0CjWa+5I8YUTkNdKOvyB29Vs6+bO5/rl6ckjwl/1J7IeCKdxGYagt3M,iv:E1WMOak5rHjLuxkJ6YWScu9M2zYS1ZEZ1b4v+bCTicg=,tag:vP9fpCKAHNaFfY0R7NVMyw==,type:str]
     - ENC[AES256_GCM,data:OYNQN6eV677o3lBZGizphGHxLiMJMpNRH+kq4K9edQ==,iv:5B4Tyfj3CBFXiJq25/eYGYgpSilutnvsB03ayXKB9To=,tag:keQj6n0G8d7fKdq/H56jyw==,type:str]
 sops:
-    lastmodified: "2026-04-28T15:09:58Z"
-    mac: ENC[AES256_GCM,data:CTHkSskZLjeotFI7AaHgZBO/GBWmlwmw8P55JxwFB9bndKxXqBXjM+1ov6kBo69+FkwwW0y4VVeXGEJCKJiLIFLxW4zn5za8BD5/XUFLFXq2wueFp9KHbNStLYhQPnPWuH0VY4A1g7kfQoZHb7xoD/D7Hq179UtUIhvJ9RyU3Qc=,iv:QaruhGfSgGEJvWtnxSCwO7QulWidwsn9BVCz0eRCBrw=,tag:vy5BQHnoqkZwsPhy8aiC2w==,type:str]
+    lastmodified: "2026-05-04T03:06:06Z"
+    mac: ENC[AES256_GCM,data:CuTXSSydyZlRGmGUjxs5ZQOKFnmsA9vScwz8t4fFn/cDZQH+6ScPxmrDGEpr8vigdZZUUFp6wtWY6bMvlLtoWtdvk9hg/kuoCA5XgoBnPuRJUl67+l4iT1mx0UGKed8PMbHdOAxM1sxH+SBS6xdxn8Iy36XtJRLB8BC+RsWOPBs=,iv:krl7WWdRzUlMCqX/kT8RlVD5JkgQs/LHQ75aZUxP9p8=,tag:Jqx7/M4R2bc0UpeSmALEMg==,type:str]
     pgp:
         - created_at: "2026-04-28T15:09:58Z"
           enc: |-
