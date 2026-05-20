@@ -1,11 +1,11 @@
 machine:
     # Static IP Configuration
     network:
-        hostname: dev-lawnops-worker-01
+        hostname: dev-app-worker-06
         interfaces:
             - interface: eth0
               addresses:
-                - 192.168.1.221/24
+                - 192.168.1.226/24
               routes:
                 - network: 0.0.0.0/0
                   gateway: 192.168.1.254

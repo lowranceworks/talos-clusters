@@ -1,0 +1,24 @@
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: tailscale
+environment:
+    - ENC[AES256_GCM,data:AFGzH7nlxR3yoPDQ3QMxbhaWAdZ52zG1Sr8tdpsqiLaGVKk46EG/ECyl1nNtPuuoYC9kCim50+a1CMfm133GYjYKFIWG6Ny4RQ==,iv:QB9KQcD8Z79hd/X28697tooS3d+Ian8/QIocz1W12bI=,tag:CU3JH6fcE6lS+FRNSAIPpg==,type:str]
+    - ENC[AES256_GCM,data:B5D9zG8sBnokjEtw5YFxsiEuBPGuZqLCPfLiyjNFkw==,iv:I3yPRsCOBPWeAbP5ZLH2PKb73MNmCB948gx9wday6mI=,tag:QSYwby/f9/0QBlyKTQ8imQ==,type:str]
+sops:
+    lastmodified: "2026-05-20T21:09:32Z"
+    mac: ENC[AES256_GCM,data:ghf8+lQ2ENbaRpAmmb4ErrVDsZHo/+pQlXD2z0AB9vgXrdd8JT+bQFcG1HkJNd2R5WmMbppB7X2hvugEJ5uM4sfkiyiGWZvWZSJHXRcj+Blpko7UszrF7h9d5mTk3yqcuRVc9m0EPOldMk6LXnTEgFGVRTKpPDr41vrUrADTT6g=,iv:vEjUSWsxV1/QSr8vjmsJFggZkfyvdxXMbn8YjwfWIXE=,tag:ffiv8dStT2MCy7sORBhATg==,type:str]
+    pgp:
+        - created_at: "2026-05-20T21:09:32Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DcDhmFWror8ASAQdAhGWhi7osVEqcQsqGBEr0eaMD4RPfV6Cfs5pzN+PMa24w
+            RrEdgLWjF9d3sCFjfvQBNn3cA7sEcY7uvcDo18E4ew+mSS8LGu1QbM8ky1Pej/Ah
+            1GYBCQIQopaJoqTVdyYxitY+t0OMRAUBhJ7vmOmvG78V+qvlZX/T46ePO1PVcA95
+            UOKz3Zrvz/OFAS1UUdZfeocK3rxUdibi7ehEYUcaRXrhTv/qwC+A8rkPb8BrMAPa
+            WE4GD+YgtD8=
+            =t2Ds
+            -----END PGP MESSAGE-----
+          fp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
+    encrypted_regex: ^(ca|crt|id|secret|secretboxEncryptionSecret|secretboxencryptionsecret|token|bootstraptoken|key|environment|TS_AUTHKEY)$
+    version: 3.10.2
