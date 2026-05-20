@@ -8,10 +8,10 @@ machine:
     # Defines the role of the machine within the cluster.
     type: worker
     # The `token` is used by a machine to join the PKI of the cluster.
-    token: ENC[AES256_GCM,data:xl1P9htrA3Oe0HUP+7MGFL7J+U5sbC4=,iv:e/TRTb6EMs2CpqvGoeW13SlMVAtVtCO1SPKWpuaNiiQ=,tag:jUCCWqCHn36GeoKbnJT6nw==,type:str]
+    token: ENC[AES256_GCM,data:2jTPOSbT1ksNUqndqWZKG3A2g8cQqhI=,iv:3bPaiIDvdcMWSd7T180BnPKXMGw6guxsBs1LivdXq+4=,tag:FXrZMaNNTm6lmusRxmTMtQ==,type:str]
     # The root certificate authority of the PKI.
     ca:
-        crt: ENC[AES256_GCM,data:SVVTyXuBRBhfPiz3dDqBaU4P1jbLNW614c+k2zbjsMUIRTFfV56NnAcb/2gloXQhhgMQn1ZQHX6Y+XbBXlqJfxN/gAaLcvEr8dpUFJ2xhW/q2vwva22Dji87vPNKxhdvsXfoOheiOUF0IgpprEl/Ee2NfU5WQskQbo51+JwyBqdObJTnr0sBK9osYNyLc5lLpyxYyOeAhtKb7GBP4g3NodQrOsInMWX9G8xEIXY5i1RW7wHdigr1Rs3u0c71R9WN+74If6hkNg+giQONibOCPFLrZSiqSZAgQRI5iubFaTkqX4j45RBQ7s6IuhoOI/SMo0QYH9j8e+urWv1j85W2Skamb6ZIwn76Hm2ePOQriFv5ajAPilVt/voVOdhgJJ1Pw3TKRlSaS/n6jKsspIEIqu6kV7OUerloSw1Hbzf3+rTSsF33uw5e3RkshknwJdtW/aE2XTIIn4rPcHkctyNs+6qhkQIr+cQE49Gabs74IpAXt//RQLDpQYukpB3TK74SQeiQ9U7wibFoC6f5mbnhiwO9D+BAqskBDahThTGAf0KweKgAG2OprnkaV4UKufRFAe4j5mOTW3IKf3kq90ZM0VCt7MjD9Cmm50P/OldYGu5EG4Un/J/VN4twNFFzegmZbDPjbHlTJ/Up6fq3+P02NB12xNx7TbWo5mgdCFdFAXly1yEzcjjebs1bOwof3/EUGxs+aOg7YxXmwfYDeZnhOvzcoxGD/R/S8aWwL59bDQXTtNH8m/JXQpcmFdgPqAxnDihQ/eO00QBs3P6Ynj3KkAaSRbrsjazVFZq6htC8uvY+UGGz6yiomZ60p3k+qWGJuU7Uj9hdl19K8LFyRoXg39joJesfQ2LsenTZ477WGvzTvNZz,iv:o7zWpGE1fxbU584BAd7K6QyKs6W4EFpevs9ycQrEjNw=,tag:RH3aOMZwjR2aijQiQfCbGA==,type:str]
+        crt: ENC[AES256_GCM,data:tnv0IBuq7va6ndqFP1j1Zp5sL9qx/rZA7Dk1wZqWlqJYzmGhOjM21+fFnMgy5RtDkgcmCWBxqtbExiKGmN50T62+0gcraKLf8KI4i0x5lmVrR8W4+srkMAh6x1kT3s0Un8ORqmTSG323udAt4UCvBCJvmEj9voi65hm3zPHZGtZR8e5ccUL61LPMO+DoA0HHI/Wfg7H3gu5bHbWSVIozeaJEP2vFAbE+WNm6QbUUwiScOv+8RTyDfqe3n9x+EiD7JXl5hYCuKsZoWV3l3cL/saZzbk9fF+nUAeUz0ifEOulZe19WjGfbzbchbroQjIkjbU++vv9iKho9ZiN+d8J3mPUk91+jMPmwyGj8aczTk+4qzHNzdB5oksEZbTml9ihVaJTknr5GylgJg5pooPPcfR7YOjYAfDuDaQ+vsQyMTE2xoiT1P5sCIHpreSo5aOtaagAexSfp1089D2Zl05DUuDzrOwsZ7rkkdTVVHNB3s2ORpOQj+Kb18Gma4dek8z13bzo0EkaB12JSnDKwNE2ik2eQnrS6Ji7G0AxHeVSi1LJvufYutR+A8yxWc/8okWttPfSyUvwt6DeGXUNrXfpFaCeAm9O9H2e0QRc9aCNKxmZglMHL6Y1sSuZ+9/wCbvrK0LRpEf+T3W4UHimPkRQQnoxNeNZYf6j46ivfCLP16JbqmSWMCj3n5m0LKJw663wxgsOCKpZ5iMFZjMTJm97V14GbY0ALsfHkkHmryWC1xxAkhz71fB585tsDKEH73TJnEmJQxzi19+cHRum90XinTkEFriNxwxjeW2y7hiMh+cC/Cy+uot6BDiG7TcbiknRDSTMBawA6SWrvyYsIXuOwnVgHX04yXtpUqUeU82LRgnYmRcM7,iv:bGN+Gs92P24e9SPaQa4ukHq8a//RCftl/j/R+xQ3uV4=,tag:v6F6IRrBO2tgzeejNWJP6g==,type:str]
         key: ""
     # Extra certificate subject alternative names for the machine's certificate.
     certSANs: []
@@ -384,9 +384,9 @@ machine:
 # Provides cluster specific configuration options.
 cluster:
     # Globally unique identifier for this cluster (base64 encoded random 32 bytes).
-    id: ENC[AES256_GCM,data:l3P4C4wozXzxqUM1v1fJQIRL6U3euHsPTXvYHIeHyomrIN1aRnwFqGr4aTM=,iv:tRrJaX7b3y5uBZbH47HaKGe9NpbiRM/7RgoleIniI5M=,tag:IjubUtP8KG7OmStLNgZvsg==,type:str]
+    id: ENC[AES256_GCM,data:zm8W9Enelb5E6K8UVEMkZ0gfkQ6pIiOJ+i4SDTbJ64TbsDQPN/hBNk4Ownc=,iv:4hLeEDwD1yYbKGhsibuWJf3C6iAl1vNzhMStYYIMJBA=,tag:sKIbWzEFq9oSVwv05Yq7/Q==,type:str]
     # Shared secret of cluster (base64 encoded random 32 bytes).
-    secret: ENC[AES256_GCM,data:wtb8WS3gdLPd9r4SPY97BF6grC55pp7Ao6tnQVC9W28f4rOsOr19lgwoG8s=,iv:dNaodpOgdqufZ5o0Rr/truYCFUmzghStHlFiQWO9D7M=,tag:6o7+PKJsb7tib7nw5+RaaA==,type:str]
+    secret: ENC[AES256_GCM,data:MCMLZDTRrrEbo+UZVkQmgRSsFp4Zz/PrAzO5+FR689IN3RGaT1Y5qXK7Dns=,iv:mErHAwfC+8is2SNaMx7v9xIP4T3CVnBkXFLvbOFOp4c=,tag:kvfqTKuVkc1jMPk+lfWJ6Q==,type:str]
     # Provides control plane specific configuration options.
     controlPlane:
         # Endpoint is the canonical controlplane endpoint, which can be an IP address or a DNS hostname.
@@ -410,10 +410,10 @@ cluster:
             #     urls:
             #         - https://docs.projectcalico.org/archive/v3.20/manifests/canal.yaml
     # The [bootstrap token](https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/) used to join the cluster.
-    token: ENC[AES256_GCM,data:+Y0GRRURwSpQGKLMxaljudrwNdJ/rUc=,iv:ZnPjMiyTPi9bsW+8eYac9SurKErHkbxPp4WXsnqfRQ4=,tag:icDxu1omjEj7VTPY3y2KgA==,type:str]
+    token: ENC[AES256_GCM,data:fvgb2w+JMDnvqx6wwsvTyROGaOeeriM=,iv:03zaAuAi388ZyXxY5AbbKbH8WkjD1TZI2UrERYIOaIM=,tag:kxA8erYjNche/bq6myj+eg==,type:str]
     # The base64 encoded root certificate authority used by Kubernetes.
     ca:
-        crt: ENC[AES256_GCM,data:aanjFiV2mRgmTFvhnz18WvAB6gLLJwD5pGLKtyUyIz7fLzccPwULoOwMomn9tuOLErxtmC/7Zqe/ZwUuetBXAFJruKUWHSWSFIh5ZCWLnr1SI6kqssprCoTHKiF5H9IqRG4ol/so/X/idkZl9mkinPhFmUmdxi/M5G41/Ea4uf9G2+w7hv6QRzhozOtlpYvn+Bq4VPrsDAXW0LGAXA/qC0BkBYqOn/bPzs0zbroRLD+iV65c1bucecDLn+0q8Z+7J6tc+kVbNr6IHjQ3d/+j9aHtBwxAActtm5Nqc1UQoReNvyqtO+EhKLxDNaVkMnDuxmWUr4ed2psl52/wB0CKtuJrXHhwg39DD6TKvjSm1m3ob8BOBd6Ry2bQH4qK1NUd+ycUCanasX4HemFkip5aeAcy//0/9RGx6/EdhmHbfo4kBwHvgcWe4OWA5mlvxcReDGHi3eZgZB+8Sd5Sw5izjgmOxrQpOqtXTxZ/VKPannVX/dSAzScbPmFhLRmXHuA/JllLW+amoODKPYhHbGECn96WxV4aavHa8wNlaPojBMdmSbo7o2VnLhF4B1PUGFZ2+zPeeBSeiobeqrQnYODk6jonX5m9/lJOdUb9NkLkOUbgFPgTQ20pG64MShnVMhNlrDDto7dRG9/TU283g61dSB7Kcc7zhlmgGC74peBsEHHdLSueJplLBJgTOi+NTpGzLGxT3yfzP1HnpXVoP9btadnFpZYGCmnZcGAtHoXU42Ih8r4oZxqnP/rcFH99ejYh3i7lQcQjlpz5G99FXCb918hEz4FHvVWJZrikVAEWMZ+kEg3KwXAJXTtFp4SSs4YfyDy3NV1Dxuj2VkZaoR5H8HqvqvD21rvXcGp4L1uVuEuffVNdsDiDs9Gy5jXLIbs6kmqSD+iEq4WxQ4GqLUdjwru9WCzIEc8SlykdwAusi7jamMcLYlbM/ckmMXo3MVB+huQtA3loDav1zwEDddQPa8Ae4e0lVETbo8jjKUo04/6UWvYneDJHLvxJ9GkT9aumEyOfRBkPi4fKpILMLxU1kRnVibwFFrO2lkBpxg==,iv:aHlTAZ6MxI1PKpjeIehHVP5oON+Qnp8D4TYC5I6/Xjk=,tag:+Ngin0PvEuXCukuzjH6Kdg==,type:str]
+        crt: ENC[AES256_GCM,data:5lnahs3WNe43GvuwOqWUaep5OCs8tnVUP7d86SBei0HJ3jPGZmUDjtuTtOj05b1VC3pF+e6m2/Cz0fv1iaCP5s42wibUTQRzhcuvjSjK7fUqurgtRpK7r+e8dZe/A28x2z11yTGZgxc469B4dz0dLtyJUfz1Iy05pRF8ZrLGhx9rNO/wAX2Qi8e60ZtbqZTtSxTywVtZzQR4AuUjdk7a1H/svHMlJt24o9zx/N3ILQXr0DP9nafSXFVzQZi2PpbbHcl/jL9zBP2WhBU3J0fxvy6JO0uAfUxLepUd7yUAIxb48DojTKIJcelPgcA7TFNkB1w+wG7QlaTsnkv2BIDNNMEP05617W/uaXZBILIcMD8ox150kJKL/mtaGHenq2b2Qar3Y3iVUJzvKAaQ6nHSVaBvQ/pa7FA8OHuc9qCYjGHC+pqOnAYHKPq8s2y9hCGkXoG197/wc5G8tEX8mxXMAjdOg/qfwj2w0D1tblsDwoCaf6H9Q8vgoEO99AQNmwVJK0tVAYTourA3H7wFinwtGRhz390Jyp/GyzGYzop2lS6oGbH9mb827yRzPC/XCrs/EfADNNN+OBhet1ivR/E5g6nK7sA14zLi/PAkg6Vabp8DSpxtoLmO4JRZgGYTdoloXK3SybKeG6YR9PVnX/oPzxcGTECB1A/jfSut2AXLcBYoOTQKZTA1sdWOxcAzCdm3Z8o0qlkJ/1d1gKyZUMdjn0kxY9PCMkLyflIHHUg6S3gcHIjxZ3abRs1t1VhwDllCEDShLQuhLx70clWDMtCSvYdJOXt01bdsbj1Dw3doyjCD7EpXXlvZChgmDAjmsc8E6G/AnScFMZvm04V3XwAHJCHwWcJReOkV4fttIPmCEIO8zh9qwnVy9Ky2dhXL6w3O+qCmUiuKTIAsdKZ+CsLOkUGB9Pmw/VU+ImWQnYrYbuRANM9qitosWh7FpM2SDm8R71pqfTGkIETJE2tksF1b9Ruc0Aj25bqJCePOwq2s5z3qq1adiJBE/wXvCh3MuaiUTRdllrLoGgsgrDe0vrWq1k3cl3dvrTxLcHbWLA==,iv:sVewrDnTZRXKRwEKNJPxoE9jB1wbALaEllbY2vNT2h0=,tag:SKmRawi+eBUBY7G4fWs4kQ==,type:str]
         key: ""
     # Configures cluster member discovery.
     discovery:
@@ -570,20 +570,20 @@ cluster:
 # # Allows running workload on control-plane nodes.
 # allowSchedulingOnControlPlanes: true
 sops:
-    lastmodified: "2026-04-01T04:54:11Z"
-    mac: ENC[AES256_GCM,data:nsYLVwd+8u3xBKyjk3jayMQP9bImmz54uwOvOUOvU73qxK0d4VfvhBnvvQgpv/kRSRkMSz/+EllqUe8ODJNXzQz0+nCdjFCbDpg4Yz+51HKbFle/HoCd1iUf5TS4T8HGxzh49f2ou338zW4FKX70H9vVN3fhSc4q9yXLQAdn17I=,iv:vrydbhb8DvBY/8SObCyy45o1o1XZTFXxAyYRjaM+I7o=,tag:EbeERt+rYTRmp/GjGsHoXg==,type:str]
+    lastmodified: "2026-05-20T15:29:35Z"
+    mac: ENC[AES256_GCM,data:Dd4kckHgx3fLGawq4XgYejsFOo0+aZsx+pwRvqMPgOlaX+AQwT648VUlz+VBpBsCuZknrbdTndoCkw6yf4eH9/L8fSZERPDml7hBtP5vqlPlt5yDFrNNXsh4tf8iIWIEZfiAn7KCdJ2ISv9Q48Wy6T7eS78PgleQ1KchHso3jE4=,iv:ZQdYvo0uf6Bj4BSOsYs+mIDrlZwMc4Ip/eatfGcZWtM=,tag:C0HGAlDmbyTxTFDm5sU0Yg==,type:str]
     pgp:
-        - created_at: "2026-04-01T04:54:11Z"
+        - created_at: "2026-05-20T15:29:35Z"
           enc: |-
             -----BEGIN PGP MESSAGE-----
 
-            hF4DcDhmFWror8ASAQdAD6bWJLsGWX/mosqel8ehBa7ziHW2jda5jqVSvJNilmkw
-            ekn3MQ6eK9scjGi50nfRF9lI3US0YzeC/7ThNRH0ClHKw+rRINfLKj+masFlgOmB
-            1GgBCQIQjWXnx7Fg89HrGrxmxcO0p0r3y16wEa6FPiRmgouXb0coa3AeyxAR7ZcV
-            789wNIX11ij+7siG9k8j59SR/mgHtAyU8GlNK8SRVAntEPlEs71ajajcGJytc+ae
-            7eoiplijlScR1w==
-            =39iv
+            hF4DcDhmFWror8ASAQdAK+M5u3F6BLxCSwqF+b34nRp6Xr68N2jP8fumeG3sSE0w
+            d/3Qv/7XQJTaYzjKWsXBIXrVtSpcNxd+Tby4HRYaOhD6lgNHBGy7dMo6NPbj4JmK
+            1GgBCQIQXdLXqswRtoR2swXNFIBOn/ENyUMs0jisN9ug3OoAN/zLnXfNCRoPvs8l
+            WiQ0kg5v6EtBG10BM4+wAuktt4bJ5mo14U/EKZGaDUkmDtjwsN0rXyDXlQmf3vjp
+            fyunJ+gPv5jlKw==
+            =MJ3e
             -----END PGP MESSAGE-----
           fp: 46A08BAEF7DB948F66897A69C6D12C69DB830D3B
-    encrypted_regex: ^(ca|crt|id|secret|secretboxEncryptionSecret|token|bootstraptoken|key|environment|TS_AUTHKEY)$
+    encrypted_regex: ^(ca|crt|id|secret|secretboxEncryptionSecret|secretboxencryptionsecret|token|bootstraptoken|key|environment|TS_AUTHKEY)$
     version: 3.10.2
