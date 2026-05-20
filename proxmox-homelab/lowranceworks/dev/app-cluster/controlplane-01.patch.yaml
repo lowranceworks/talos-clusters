@@ -1,7 +1,7 @@
 machine:
     # Static IP Configuration
     network:
-        hostname: dev-lawnops-cp-01
+        hostname: dev-app-cp-01
         interfaces:
             - interface: eth0
               addresses:
