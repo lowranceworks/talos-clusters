@@ -1,19 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Apply Talos configs to all nodes in the current cluster directory.
-# Run from a cluster directory (e.g., proxmox-homelab/lowranceworks/dev/app-cluster/)
-# where .env is sourced via direnv.
+# Apply Talos configs to all nodes in a cluster directory.
 #
-# Usage: talos-apply.sh
+# Usage: talos-apply.sh <cluster-dir>
+#   e.g.: talos-apply.sh proxmox-homelab/lowranceworks/dev/app-cluster
+
+dir="${1:-$PWD}"
+cd "$dir"
 
 # Ensure required files exist
 for f in worker.yaml controlplane.yaml tailscale.patch.yaml; do
     if [[ ! -f "$f" ]]; then
-        echo "ERROR: $f not found. Decrypt it first (e.g., sops -d ${f%.yaml}.enc.yaml > $f)" >&2
+        echo "ERROR: $f not found in $dir. Decrypt it first (e.g., sops -d ${f%.yaml}.enc.yaml > $f)" >&2
         exit 1
     fi
 done
+
+# Source .env for node IPs
+if [[ -f .env ]]; then
+    set -a
+    source .env
+    set +a
+fi
 
 # Apply worker configs
 for patch in worker-*.patch.yaml; do
