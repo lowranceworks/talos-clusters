@@ -1,4 +1,6 @@
 machine:
+    nodeLabels:
+        node-role.kubernetes.io/worker: ""
     # Static IP Configuration
     network:
         hostname: prod-platform-worker-03

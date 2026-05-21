@@ -1,4 +1,7 @@
 machine:
+    nodeLabels:
+        node-role.kubernetes.io/worker: ""
+        workload-type: database
     # Static IP Configuration
     network:
         hostname: dev-app-worker-04
