@@ -1,6 +1,5 @@
 machine:
     nodeLabels:
-        node-role.kubernetes.io/worker: ""
         workload-type: application
     # Static IP Configuration
     network:
